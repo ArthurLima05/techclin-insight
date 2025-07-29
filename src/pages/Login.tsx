@@ -67,16 +67,11 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto w-48 h-24 flex items-center justify-center">
+          <div className="mx-auto w-64 h-32 flex items-center justify-center">
             <img 
-              src="/src/assets/logo-light.svg" 
+              src="/src/assets/logo-login.png" 
               alt="TechClin Logo" 
-              className="w-full h-full object-contain dark:hidden"
-            />
-            <img 
-              src="/src/assets/logo-dark.svg" 
-              alt="TechClin Logo" 
-              className="w-full h-full object-contain hidden dark:block"
+              className="w-full h-full object-contain"
             />
           </div>
         </CardHeader>

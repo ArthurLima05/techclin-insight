@@ -62,17 +62,17 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4 sticky top-0 bg-sidebar border-b">
         <div className="flex items-center space-x-3">
-          <div className="w-16 h-8 flex items-center justify-center">
+          <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
             <img 
-              src="/src/assets/logo-dark.svg" 
+              src="/src/assets/logo-menu.png" 
               alt="TechClin Logo" 
               className="w-full h-full object-contain"
             />
           </div>
-          <div>
-            <p className="text-sm text-sidebar-foreground/80">{clinic.nome}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-sidebar-foreground/80 truncate">{clinic.nome}</p>
           </div>
         </div>
       </SidebarHeader>

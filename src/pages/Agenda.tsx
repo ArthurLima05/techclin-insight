@@ -114,9 +114,9 @@ const Agenda = () => {
       </div>
 
       {/* Filtros */}
-      <div className="flex gap-4 items-center">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
         <Select value={viewMode} onValueChange={(value: 'week' | 'month') => setViewMode(value)}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-full sm:w-40">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -126,7 +126,7 @@ const Agenda = () => {
         </Select>
 
         <Select value={selectedProfessional} onValueChange={setSelectedProfessional}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -138,21 +138,21 @@ const Agenda = () => {
         </Select>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 xl:grid-cols-3 max-w-full overflow-hidden">
         {/* Calendário */}
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
               <CalendarIcon className="h-5 w-5" />
               Calendário
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-2 sm:p-6">
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
-              className="rounded-md border"
+              className="rounded-md border w-full"
             />
             
             {/* Integração Google Calendar */}
@@ -169,11 +169,13 @@ const Agenda = () => {
         </Card>
 
         {/* Lista de Agendamentos */}
-        <Card className="lg:col-span-2">
+        <Card className="xl:col-span-2 min-w-0">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Agendamentos
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm sm:text-base">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Agendamentos
+              </div>
               {selectedDate && (
                 <span className="text-sm font-normal text-muted-foreground">
                   - {viewMode === 'week' ? 'Esta semana' : selectedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
@@ -181,9 +183,9 @@ const Agenda = () => {
               )}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 max-h-96 overflow-y-auto">
+          <CardContent className="space-y-4 max-h-96 overflow-y-auto min-w-0">
             {Object.entries(appointmentsByDate).map(([date, dayAppointments]) => (
-              <div key={date} className="space-y-2">
+              <div key={date} className="space-y-2 min-w-0">
                 <h4 className="font-medium text-sm text-primary">
                   {new Date(date).toLocaleDateString('pt-BR', { 
                     weekday: 'long', 
@@ -192,23 +194,23 @@ const Agenda = () => {
                   })}
                 </h4>
                 {dayAppointments.map((appointment) => (
-                  <div key={appointment.id} className="p-3 border rounded-lg space-y-2">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{appointment.paciente}</span>
+                  <div key={appointment.id} className="p-3 border rounded-lg space-y-2 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="font-medium truncate">{appointment.paciente}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3" />
+                          <Clock className="h-3 w-3 flex-shrink-0" />
                           <span>{appointment.horario}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="h-3 w-3" />
-                          <span>{appointment.profissional}</span>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+                          <MapPin className="h-3 w-3 flex-shrink-0" />
+                          <span className="truncate">{appointment.profissional}</span>
                         </div>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 flex-shrink-0">
                         <Badge variant={getStatusColor(appointment.status)}>
                           {getStatusLabel(appointment.status)}
                         </Badge>
@@ -225,7 +227,7 @@ const Agenda = () => {
             {Object.keys(appointmentsByDate).length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhum agendamento encontrado para o período selecionado</p>
+                <p className="text-sm">Nenhum agendamento encontrado para o período selecionado</p>
               </div>
             )}
           </CardContent>
