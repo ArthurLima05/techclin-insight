@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Users, UserCheck, Clock, TrendingUp, Calendar, AlertTriangle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MetricCard from '@/components/dashboard/MetricCard';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { useClinic } from '@/contexts/ClinicContext';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +21,32 @@ const Dashboard = () => {
     origins: {} as Record<string, number>,
     professionalVolume: {} as Record<string, number>,
   });
+
+  const COLORS = ['#1d4640', '#fd9b64', '#e6e6d7', '#8884d8'];
+
+  const chartData = [
+    { name: 'Jan', agendamentos: 65, cancelamentos: 8 },
+    { name: 'Fev', agendamentos: 85, cancelamentos: 12 },
+    { name: 'Mar', agendamentos: 78, cancelamentos: 6 },
+    { name: 'Abr', agendamentos: 92, cancelamentos: 14 },
+    { name: 'Mai', agendamentos: 88, cancelamentos: 9 },
+    { name: 'Jun', agendamentos: 95, cancelamentos: 11 },
+  ];
+
+  const getOriginChartData = () => {
+    return Object.entries(metrics.origins).map(([name, value], index) => ({
+      name,
+      value,
+      color: COLORS[index % COLORS.length]
+    }));
+  };
+
+  const getProfessionalChartData = () => {
+    return Object.entries(metrics.professionalVolume).map(([name, atendimentos]) => ({
+      name,
+      atendimentos
+    }));
+  };
 
   useEffect(() => {
     if (clinic) {
@@ -157,21 +184,76 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Origem dos Pacientes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            {Object.entries(metrics.origins).map(([origin, count]) => (
-              <div key={origin} className="text-center p-4 border rounded-lg">
-                <div className="text-2xl font-bold text-primary">{count}</div>
-                <div className="text-sm text-muted-foreground">{origin}</div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Gráfico de Agendamentos vs Cancelamentos */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Agendamentos vs Cancelamentos</CardTitle>
+            <CardDescription>Comparação mensal dos últimos 6 meses</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="agendamentos" fill="#1d4640" />
+                <Bar dataKey="cancelamentos" fill="#fd9b64" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Gráfico de Origem dos Pacientes */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Origem dos Pacientes</CardTitle>
+            <CardDescription>Distribuição por canal de aquisição</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={getOriginChartData()}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {getOriginChartData().map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Gráfico de Atendimentos por Profissional */}
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Volume de Atendimentos por Profissional</CardTitle>
+            <CardDescription>Distribuição mensal de atendimentos</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={getProfessionalChartData()} layout="horizontal">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis dataKey="name" type="category" width={100} />
+                <Tooltip />
+                <Bar dataKey="atendimentos" fill="#1d4640" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

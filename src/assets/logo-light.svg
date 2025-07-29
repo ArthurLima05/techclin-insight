@@ -1,0 +1,20 @@
+<svg width="200" height="100" viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- TC Icon -->
+  <rect x="35" y="25" width="15" height="4" fill="#1D4640"/>
+  <rect x="35" y="25" width="4" height="15" fill="#1D4640"/>
+  <rect x="50" y="25" width="4" height="15" fill="#1D4640"/>
+  <rect x="54" y="25" width="15" height="4" fill="#1D4640"/>
+  <rect x="65" y="25" width="4" height="15" fill="#1D4640"/>
+  <rect x="54" y="36" width="15" height="4" fill="#1D4640"/>
+  
+  <!-- Orange accent -->
+  <rect x="50" y="25" width="4" height="4" fill="#FD9B64"/>
+  
+  <!-- TechClin text -->
+  <text x="30" y="55" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1D4640">TechClin</text>
+  <text x="108" y="55" font-family="Arial, sans-serif" font-size="12" fill="#1D4640">.co</text>
+  
+  <!-- Subtitle -->
+  <text x="30" y="70" font-family="Arial, sans-serif" font-size="8" fill="#FD9B64" letter-spacing="2px">SOLUÇÕES TECH EM</text>
+  <text x="30" y="80" font-family="Arial, sans-serif" font-size="8" fill="#FD9B64" letter-spacing="2px">CLÍNICAS MÉDICAS</text>
+</svg>

@@ -132,6 +132,45 @@ export type Database = {
           },
         ]
       }
+      medicos: {
+        Row: {
+          ativo: boolean
+          clinica_id: string
+          created_at: string
+          crm: string
+          email: string | null
+          especialidade: string
+          id: string
+          nome: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          clinica_id: string
+          created_at?: string
+          crm: string
+          email?: string | null
+          especialidade: string
+          id?: string
+          nome: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          clinica_id?: string
+          created_at?: string
+          crm?: string
+          email?: string | null
+          especialidade?: string
+          id?: string
+          nome?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       metricas_diarias: {
         Row: {
           clinica_id: string

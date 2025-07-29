@@ -67,15 +67,17 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto w-24 h-24 bg-primary rounded-lg flex items-center justify-center">
-            {/* Espaço para sua logo */}
-            <span className="text-primary-foreground font-bold text-lg">LOGO</span>
-          </div>
-          <div>
-            <CardTitle className="text-2xl font-bold text-primary">TechClin</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Sistema de Gestão para Clínicas Médicas
-            </CardDescription>
+          <div className="mx-auto w-48 h-24 flex items-center justify-center">
+            <img 
+              src="/src/assets/logo-light.svg" 
+              alt="TechClin Logo" 
+              className="w-full h-full object-contain dark:hidden"
+            />
+            <img 
+              src="/src/assets/logo-dark.svg" 
+              alt="TechClin Logo" 
+              className="w-full h-full object-contain hidden dark:block"
+            />
           </div>
         </CardHeader>
         <CardContent>

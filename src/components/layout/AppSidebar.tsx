@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { BarChart3, MessageSquare, Calendar, LogOut } from 'lucide-react';
+import { BarChart3, MessageSquare, Calendar, LogOut, UserCog } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -52,17 +52,26 @@ export function AppSidebar() {
       icon: Calendar,
       enabled: clinic.agenda_ativa,
     },
+    {
+      title: "Médicos",
+      url: "/medicos",
+      icon: UserCog,
+      enabled: true, // Sempre disponível
+    },
   ].filter(item => item.enabled);
 
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center">
-            <span className="text-sidebar-primary-foreground font-bold text-sm">LOGO</span>
+          <div className="w-16 h-8 flex items-center justify-center">
+            <img 
+              src="/src/assets/logo-dark.svg" 
+              alt="TechClin Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
-            <h2 className="font-semibold text-sidebar-foreground">TechClin</h2>
             <p className="text-sm text-sidebar-foreground/80">{clinic.nome}</p>
           </div>
         </div>
@@ -97,9 +106,9 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4">
         <Button
-          variant="outline"
+          variant="destructive"
           onClick={handleLogout}
-          className="w-full justify-start text-sidebar-foreground border-sidebar-border hover:bg-sidebar-accent"
+          className="w-full justify-start"
         >
           <LogOut className="w-4 h-4 mr-2" />
           Sair

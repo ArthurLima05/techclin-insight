@@ -9,6 +9,7 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import Feedbacks from "./pages/Feedbacks";
 import Agenda from "./pages/Agenda";
+import Medicos from "./pages/Medicos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/feedbacks" element={<Feedbacks />} />
               <Route path="/agenda" element={<Agenda />} />
+              <Route path="/medicos" element={<Medicos />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
