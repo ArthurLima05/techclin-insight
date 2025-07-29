@@ -215,6 +215,33 @@ export type Database = {
           },
         ]
       }
+      whatsapp_clinicas: {
+        Row: {
+          ativo: boolean
+          clinica_id: string
+          created_at: string
+          id: string
+          numero_whatsapp: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          clinica_id: string
+          created_at?: string
+          id?: string
+          numero_whatsapp: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          clinica_id?: string
+          created_at?: string
+          id?: string
+          numero_whatsapp?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
