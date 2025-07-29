@@ -14,7 +14,168 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agendamentos: {
+        Row: {
+          clinica_id: string
+          created_at: string
+          data: string
+          horario: string
+          id: string
+          origem: string
+          paciente: string
+          profissional: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          clinica_id: string
+          created_at?: string
+          data: string
+          horario: string
+          id?: string
+          origem: string
+          paciente: string
+          profissional: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          clinica_id?: string
+          created_at?: string
+          data?: string
+          horario?: string
+          id?: string
+          origem?: string
+          paciente?: string
+          profissional?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamentos_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinicas: {
+        Row: {
+          agenda_ativa: boolean
+          chave_acesso: string
+          created_at: string
+          dashboard_ativo: boolean
+          feedbacks_ativos: boolean
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          agenda_ativa?: boolean
+          chave_acesso: string
+          created_at?: string
+          dashboard_ativo?: boolean
+          feedbacks_ativos?: boolean
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          agenda_ativa?: boolean
+          chave_acesso?: string
+          created_at?: string
+          dashboard_ativo?: boolean
+          feedbacks_ativos?: boolean
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      feedbacks: {
+        Row: {
+          clinica_id: string
+          comentario: string | null
+          criado_em: string
+          id: string
+          nota: number
+          paciente: string
+          profissional: string
+        }
+        Insert: {
+          clinica_id: string
+          comentario?: string | null
+          criado_em?: string
+          id?: string
+          nota: number
+          paciente: string
+          profissional: string
+        }
+        Update: {
+          clinica_id?: string
+          comentario?: string | null
+          criado_em?: string
+          id?: string
+          nota?: number
+          paciente?: string
+          profissional?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedbacks_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      metricas_diarias: {
+        Row: {
+          clinica_id: string
+          created_at: string
+          data: string
+          faltas_total: number
+          id: string
+          origens: Json | null
+          taxa_retorno: number | null
+          tempo_medio_agendamento: number | null
+          volume_por_profissional: Json | null
+        }
+        Insert: {
+          clinica_id: string
+          created_at?: string
+          data: string
+          faltas_total?: number
+          id?: string
+          origens?: Json | null
+          taxa_retorno?: number | null
+          tempo_medio_agendamento?: number | null
+          volume_por_profissional?: Json | null
+        }
+        Update: {
+          clinica_id?: string
+          created_at?: string
+          data?: string
+          faltas_total?: number
+          id?: string
+          origens?: Json | null
+          taxa_retorno?: number | null
+          tempo_medio_agendamento?: number | null
+          volume_por_profissional?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metricas_diarias_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
