@@ -16,11 +16,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { useClinic } from '@/contexts/ClinicContext';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export function AppSidebar() {
   const { clinic, setClinic } = useClinic();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleLogout = () => {
     setClinic(null);
@@ -53,12 +55,22 @@ export function AppSidebar() {
       enabled: clinic.agenda_ativa,
     },
     {
-      title: "Médicos",
+      title: "Doutores",
       url: "/medicos",
       icon: UserCog,
       enabled: true, // Sempre disponível
     },
   ].filter(item => item.enabled);
+
+  const handleMenuClick = () => {
+    if (isMobile) {
+      // Auto-hide sidebar on mobile when menu item is clicked
+      const sidebarTrigger = document.querySelector('[data-sidebar="trigger"]') as HTMLButtonElement;
+      if (sidebarTrigger) {
+        sidebarTrigger.click();
+      }
+    }
+  };
 
   return (
     <Sidebar>
@@ -87,6 +99,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.url} 
+                      onClick={handleMenuClick}
                       className={({ isActive }) =>
                         isActive 
                           ? "bg-sidebar-accent text-sidebar-accent-foreground" 
