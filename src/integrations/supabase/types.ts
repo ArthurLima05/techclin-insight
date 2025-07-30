@@ -25,6 +25,7 @@ export type Database = {
           paciente: string
           profissional: string
           status: string
+          tipo_servico: string | null
           updated_at: string
         }
         Insert: {
@@ -37,6 +38,7 @@ export type Database = {
           paciente: string
           profissional: string
           status?: string
+          tipo_servico?: string | null
           updated_at?: string
         }
         Update: {
@@ -49,6 +51,7 @@ export type Database = {
           paciente?: string
           profissional?: string
           status?: string
+          tipo_servico?: string | null
           updated_at?: string
         }
         Relationships: [

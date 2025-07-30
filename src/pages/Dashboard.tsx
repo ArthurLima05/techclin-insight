@@ -66,6 +66,7 @@ const Dashboard = () => {
       let avgWaitTime = 0;
       let origins = {} as Record<string, number>;
       let professionalVolume = {} as Record<string, number>;
+      let topServices: { servico: string; count: number }[] = [];
 
       // Buscar agendamentos apenas se a agenda estiver ativa
       if (clinic?.agenda_ativa) {
@@ -91,6 +92,17 @@ const Dashboard = () => {
           acc[apt.profissional] = (acc[apt.profissional] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {};
+
+        // Contar serviços mais consultados
+        const serviceCount = appointments?.reduce((acc, apt) => {
+          acc[apt.tipo_servico] = (acc[apt.tipo_servico] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>) || {};
+
+        topServices = Object.entries(serviceCount)
+          .map(([servico, count]) => ({ servico, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5);
       }
 
       // Origem dos pacientes (mantém para todas as clínicas)
@@ -148,6 +160,7 @@ const Dashboard = () => {
         professionalVolume,
         avgSentiment: Math.round(avgSentiment * 100) / 100, // 2 casas decimais
         topKeywords,
+        topServices,
       });
 
     } catch (error) {
