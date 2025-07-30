@@ -101,6 +101,7 @@ export type Database = {
         Row: {
           clinica_id: string
           comentario: string | null
+          como_conheceu: string | null
           criado_em: string
           id: string
           nota: number
@@ -112,6 +113,7 @@ export type Database = {
         Insert: {
           clinica_id: string
           comentario?: string | null
+          como_conheceu?: string | null
           criado_em?: string
           id?: string
           nota: number
@@ -123,6 +125,7 @@ export type Database = {
         Update: {
           clinica_id?: string
           comentario?: string | null
+          como_conheceu?: string | null
           criado_em?: string
           id?: string
           nota?: number

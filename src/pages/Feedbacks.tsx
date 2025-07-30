@@ -160,7 +160,7 @@ const Feedbacks = () => {
 
       {/* Métricas de Sentimento */}
       {clinic?.feedbacks_ativos && (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           <MetricCard
             title="Sentimento Médio"
             value={sentimentMetrics.avgSentiment > 0 ? `+${sentimentMetrics.avgSentiment}` : sentimentMetrics.avgSentiment}
@@ -173,6 +173,26 @@ const Feedbacks = () => {
             icon={MessageSquare}
             description="Total de comentários processados"
           />
+          
+          {/* Card de Palavras-Chave */}
+          <Card className="md:col-span-2">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Top 5 Palavras-Chave</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {sentimentMetrics.topKeywords.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {sentimentMetrics.topKeywords.slice(0, 5).map((keyword, index) => (
+                    <Badge key={keyword.palavra} variant="secondary" className="text-xs">
+                      {keyword.palavra} ({keyword.freq}x)
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Nenhuma palavra-chave encontrada</p>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
 
