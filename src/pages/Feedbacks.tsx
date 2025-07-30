@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Star, AlertTriangle, User, MessageSquare } from 'lucide-react';
+import { Star, AlertTriangle, User, MessageSquare, Heart, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import MetricCard from '@/components/dashboard/MetricCard';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,8 @@ interface Feedback {
   comentario: string;
   profissional: string;
   criado_em: string;
+  sentimento: number | null;
+  palavras_chave: string[] | null;
 }
 
 const Feedbacks = () => {
@@ -24,6 +27,11 @@ const Feedbacks = () => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [webhookUrl, setWebhookUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sentimentMetrics, setSentimentMetrics] = useState({
+    avgSentiment: 0,
+    totalAnalyzed: 0,
+    topKeywords: [] as { palavra: string; freq: number }[],
+  });
 
   useEffect(() => {
     if (clinic) {
@@ -41,6 +49,34 @@ const Feedbacks = () => {
 
       if (error) throw error;
       setFeedbacks(data || []);
+
+      // Calcular métricas de sentimento
+      if (data?.length) {
+        const sentiments = data.map(f => f.sentimento).filter(s => s !== null);
+        const avgSentiment = sentiments.length > 0 ? sentiments.reduce((a, b) => a + b, 0) / sentiments.length : 0;
+
+        // Contar palavras-chave
+        const keywordCount = data.reduce((acc, feedback) => {
+          if (feedback.palavras_chave && Array.isArray(feedback.palavras_chave)) {
+            feedback.palavras_chave.forEach((palavra: string) => {
+              acc[palavra] = (acc[palavra] || 0) + 1;
+            });
+          }
+          return acc;
+        }, {} as Record<string, number>);
+
+        // Top 5 palavras-chave
+        const topKeywords = Object.entries(keywordCount)
+          .map(([palavra, freq]) => ({ palavra, freq }))
+          .sort((a, b) => b.freq - a.freq)
+          .slice(0, 5);
+
+        setSentimentMetrics({
+          avgSentiment: Math.round(avgSentiment * 100) / 100,
+          totalAnalyzed: data.filter(f => f.comentario).length,
+          topKeywords,
+        });
+      }
     } catch (error) {
       toast({
         title: "Erro",
@@ -120,6 +156,44 @@ const Feedbacks = () => {
         <h1 className="text-3xl font-bold text-primary">Feedbacks</h1>
         <p className="text-muted-foreground">Avaliações e comentários dos pacientes</p>
       </div>
+
+      {/* Métricas de Sentimento */}
+      {clinic?.feedbacks_ativos && (
+        <div className="grid gap-4 md:grid-cols-3">
+          <MetricCard
+            title="Sentimento Médio"
+            value={sentimentMetrics.avgSentiment > 0 ? `+${sentimentMetrics.avgSentiment}` : sentimentMetrics.avgSentiment}
+            icon={Heart}
+            description="Análise dos feedbacks"
+          />
+          <MetricCard
+            title="Feedbacks Analisados"
+            value={sentimentMetrics.totalAnalyzed}
+            icon={MessageSquare}
+            description="Total de comentários processados"
+          />
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Palavras-Chave Frequentes</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {sentimentMetrics.topKeywords.length > 0 ? (
+                  sentimentMetrics.topKeywords.slice(0, 3).map((keyword, index) => (
+                    <div key={keyword.palavra} className="flex justify-between items-center text-sm">
+                      <span className="capitalize">{keyword.palavra}</span>
+                      <span className="font-bold text-primary">{keyword.freq}x</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-muted-foreground">Nenhuma palavra-chave encontrada</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Integração Zapier */}
       <Card>

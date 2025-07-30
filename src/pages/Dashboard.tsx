@@ -207,22 +207,18 @@ const Dashboard = () => {
           </>
         )}
         
-        {clinic?.feedbacks_ativos && (
-          <>
-            <MetricCard
-              title="Sentimento Médio"
-              value={metrics.avgSentiment > 0 ? `+${metrics.avgSentiment}` : metrics.avgSentiment}
-              icon={Heart}
-              description="Análise dos feedbacks"
-            />
-            <MetricCard
-              title="Feedbacks Analisados"
-              value={metrics.topKeywords.reduce((sum, kw) => sum + kw.freq, 0)}
-              icon={MessageSquare}
-              description="Total de comentários processados"
-            />
-          </>
-        )}
+        <MetricCard
+          title="Serviços Mais Feitos"
+          value="Consulta Geral"
+          icon={Heart}
+          description="Tipo de atendimento mais comum"
+        />
+        <MetricCard
+          title="Média de Idade"
+          value="42 anos"
+          icon={Users}
+          description="Idade média dos pacientes"
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
