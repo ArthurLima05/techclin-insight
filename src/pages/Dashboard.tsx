@@ -105,15 +105,17 @@ const Dashboard = () => {
           .slice(0, 5);
       }
 
-      // Origem dos pacientes (mantém para todas as clínicas)
-      const { data: appointments, error: appointmentsError } = await supabase
-        .from('agendamentos')
-        .select('origem')
-        .eq('clinica_id', clinic?.id);
+      // Origem dos pacientes baseada nos feedbacks
+      const { data: feedbackOrigins, error: originsError } = await supabase
+        .from('feedbacks')
+        .select('como_conheceu')
+        .eq('clinica_id', clinic?.id)
+        .not('como_conheceu', 'is', null);
 
-      if (!appointmentsError && appointments) {
-        origins = appointments.reduce((acc, apt) => {
-          acc[apt.origem] = (acc[apt.origem] || 0) + 1;
+      if (!originsError && feedbackOrigins) {
+        origins = feedbackOrigins.reduce((acc, feedback) => {
+          const origem = feedback.como_conheceu || 'Não informado';
+          acc[origem] = (acc[origem] || 0) + 1;
           return acc;
         }, {} as Record<string, number>);
       }
