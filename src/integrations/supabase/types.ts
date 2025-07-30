@@ -102,7 +102,9 @@ export type Database = {
           id: string
           nota: number
           paciente: string
+          palavras_chave: string[] | null
           profissional: string
+          sentimento: number | null
         }
         Insert: {
           clinica_id: string
@@ -111,7 +113,9 @@ export type Database = {
           id?: string
           nota: number
           paciente: string
+          palavras_chave?: string[] | null
           profissional: string
+          sentimento?: number | null
         }
         Update: {
           clinica_id?: string
@@ -120,7 +124,9 @@ export type Database = {
           id?: string
           nota?: number
           paciente?: string
+          palavras_chave?: string[] | null
           profissional?: string
+          sentimento?: number | null
         }
         Relationships: [
           {
@@ -179,6 +185,8 @@ export type Database = {
           faltas_total: number
           id: string
           origens: Json | null
+          palavras_chave_frequentes: Json | null
+          sentimento_medio: number | null
           taxa_retorno: number | null
           tempo_medio_agendamento: number | null
           volume_por_profissional: Json | null
@@ -190,6 +198,8 @@ export type Database = {
           faltas_total?: number
           id?: string
           origens?: Json | null
+          palavras_chave_frequentes?: Json | null
+          sentimento_medio?: number | null
           taxa_retorno?: number | null
           tempo_medio_agendamento?: number | null
           volume_por_profissional?: Json | null
@@ -201,6 +211,8 @@ export type Database = {
           faltas_total?: number
           id?: string
           origens?: Json | null
+          palavras_chave_frequentes?: Json | null
+          sentimento_medio?: number | null
           taxa_retorno?: number | null
           tempo_medio_agendamento?: number | null
           volume_por_profissional?: Json | null
@@ -247,7 +259,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      analisar_sentimento: {
+        Args: { texto: string }
+        Returns: number
+      }
+      extrair_palavras_chave: {
+        Args: { texto: string }
+        Returns: string[]
+      }
     }
     Enums: {
       [_ in never]: never
