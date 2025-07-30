@@ -221,23 +221,6 @@ const Dashboard = () => {
           </>
         )}
         
-        
-        {clinic?.feedbacks_ativos && (
-          <>
-            <MetricCard
-              title="Sentimento Médio"
-              value={metrics.avgSentiment > 0 ? `+${metrics.avgSentiment}` : metrics.avgSentiment}
-              icon={Heart}
-              description="Análise dos feedbacks"
-            />
-            <MetricCard
-              title="Feedbacks Analisados"
-              value={metrics.topKeywords.reduce((sum, kw) => sum + kw.freq, 0)}
-              icon={MessageSquare}
-              description="Total de comentários processados"
-            />
-          </>
-        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -258,28 +241,6 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {clinic?.feedbacks_ativos && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                Palavras-Chave Frequentes
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {metrics.topKeywords.length > 0 ? (
-                metrics.topKeywords.map((keyword, index) => (
-                  <div key={keyword.palavra} className="flex justify-between items-center">
-                    <span className="text-sm font-medium capitalize">{keyword.palavra}</span>
-                    <span className="text-sm font-bold text-primary">{keyword.freq}x</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground">Nenhum feedback com palavras-chave encontrado</p>
-              )}
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       {/* Gráficos */}
@@ -335,26 +296,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Gráfico de Sentimento dos Feedbacks - só para clínicas com feedbacks */}
-        {clinic?.feedbacks_ativos && metrics.topKeywords.length > 0 && (
-          <Card className={clinic?.agenda_ativa ? "md:col-span-2" : ""}>
-            <CardHeader>
-              <CardTitle>Análise de Sentimento dos Feedbacks</CardTitle>
-              <CardDescription>Palavras-chave mais mencionadas pelos pacientes</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={metrics.topKeywords} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="palavra" type="category" width={100} />
-                  <Tooltip />
-                  <Bar dataKey="freq" fill="#1d4640" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Gráfico de Serviços Mais Consultados */}
         <Card className={clinic?.agenda_ativa ? "md:col-span-2" : ""}>

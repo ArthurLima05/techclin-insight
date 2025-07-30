@@ -262,7 +262,7 @@ const Feedbacks = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Satisfação por Profissional
+              Satisfação por Profissionais
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
