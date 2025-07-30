@@ -22,6 +22,7 @@ const Dashboard = () => {
     professionalVolume: {} as Record<string, number>,
     avgSentiment: 0,
     topKeywords: [] as { palavra: string; freq: number }[],
+    topServices: [] as { servico: string; count: number }[],
   });
 
   const COLORS = ['#1d4640', '#fd9b64', '#e6e6d7', '#8884d8'];
@@ -207,18 +208,23 @@ const Dashboard = () => {
           </>
         )}
         
-        <MetricCard
-          title="Serviços Mais Feitos"
-          value="Consulta Geral"
-          icon={Heart}
-          description="Tipo de atendimento mais comum"
-        />
-        <MetricCard
-          title="Média de Idade"
-          value="42 anos"
-          icon={Users}
-          description="Idade média dos pacientes"
-        />
+        
+        {clinic?.feedbacks_ativos && (
+          <>
+            <MetricCard
+              title="Sentimento Médio"
+              value={metrics.avgSentiment > 0 ? `+${metrics.avgSentiment}` : metrics.avgSentiment}
+              icon={Heart}
+              description="Análise dos feedbacks"
+            />
+            <MetricCard
+              title="Feedbacks Analisados"
+              value={metrics.topKeywords.reduce((sum, kw) => sum + kw.freq, 0)}
+              icon={MessageSquare}
+              description="Total de comentários processados"
+            />
+          </>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -336,6 +342,25 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Gráfico de Serviços Mais Consultados */}
+        <Card className={clinic?.agenda_ativa ? "md:col-span-2" : ""}>
+          <CardHeader>
+            <CardTitle>Serviços Mais Consultados</CardTitle>
+            <CardDescription>Tipos de consulta mais frequentes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={metrics.topServices} layout="horizontal">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis dataKey="servico" type="category" width={100} />
+                <Tooltip />
+                <Bar dataKey="count" fill="#1d4640" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

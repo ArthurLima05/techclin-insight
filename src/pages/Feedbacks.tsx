@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Star, AlertTriangle, User, MessageSquare, Heart, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import MetricCard from '@/components/dashboard/MetricCard';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -172,27 +173,28 @@ const Feedbacks = () => {
             icon={MessageSquare}
             description="Total de comentários processados"
           />
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Palavras-Chave Frequentes</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {sentimentMetrics.topKeywords.length > 0 ? (
-                  sentimentMetrics.topKeywords.slice(0, 3).map((keyword, index) => (
-                    <div key={keyword.palavra} className="flex justify-between items-center text-sm">
-                      <span className="capitalize">{keyword.palavra}</span>
-                      <span className="font-bold text-primary">{keyword.freq}x</span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-muted-foreground">Nenhuma palavra-chave encontrada</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
         </div>
+      )}
+
+      {/* Gráfico de Palavras-Chave */}
+      {clinic?.feedbacks_ativos && sentimentMetrics.topKeywords.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Palavras-Chave Mais Mencionadas</CardTitle>
+            <CardDescription>Termos mais frequentes nos feedbacks dos pacientes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={sentimentMetrics.topKeywords} layout="horizontal">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis dataKey="palavra" type="category" width={100} />
+                <Tooltip />
+                <Bar dataKey="freq" fill="#1d4640" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       )}
 
       {/* Integração Zapier */}
