@@ -3,7 +3,7 @@ import { Star, AlertTriangle, User, MessageSquare, Heart, TrendingUp } from 'luc
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import MetricCard from '@/components/dashboard/MetricCard';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -138,6 +138,9 @@ const Feedbacks = () => {
     return acc;
   }, {} as Record<string, { total: number; count: number }>);
 
+  // Cores para o gráfico de pizza
+  const COLORS = ['#1d4640', '#2d7360', '#4a9b7d', '#6bb899', '#8dd4b6'];
+
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
@@ -205,13 +208,28 @@ const Feedbacks = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={sentimentMetrics.topKeywords} layout="horizontal">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="palavra" type="category" width={100} />
-                <Tooltip />
-                <Bar dataKey="freq" fill="#1d4640" />
-              </BarChart>
+              <PieChart>
+                <Pie
+                  data={sentimentMetrics.topKeywords}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="freq"
+                  nameKey="palavra"
+                >
+                  {sentimentMetrics.topKeywords.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  formatter={(value, name) => [`${value} menções`, name]}
+                />
+                <Legend 
+                  formatter={(value) => value}
+                />
+              </PieChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
