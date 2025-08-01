@@ -26,7 +26,6 @@ const Feedbacks = () => {
   const { clinic } = useClinic();
   const { toast } = useToast();
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
-  const [webhookUrl, setWebhookUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [sentimentMetrics, setSentimentMetrics] = useState({
     avgSentiment: 0,
@@ -84,47 +83,6 @@ const Feedbacks = () => {
         description: "Erro ao carregar feedbacks",
         variant: "destructive",
       });
-    }
-  };
-
-  const handleZapierWebhook = async () => {
-    if (!webhookUrl) {
-      toast({
-        title: "Erro",
-        description: "Por favor, insira a URL do webhook Zapier",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await fetch(webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        mode: "no-cors",
-        body: JSON.stringify({
-          timestamp: new Date().toISOString(),
-          triggered_from: "TechClin_Feedbacks",
-          clinic_id: clinic?.id,
-        }),
-      });
-
-      toast({
-        title: "Webhook enviado",
-        description: "Solicitação enviada para o Zapier. Verifique o histórico do seu Zap.",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao enviar webhook para o Zapier",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -234,33 +192,6 @@ const Feedbacks = () => {
           </CardContent>
         </Card>
       )}
-
-      {/* Integração Zapier */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            Integração WhatsApp (Zapier)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="webhook">URL do Webhook Zapier</Label>
-            <Input
-              id="webhook"
-              placeholder="https://hooks.zapier.com/hooks/catch/..."
-              value={webhookUrl}
-              onChange={(e) => setWebhookUrl(e.target.value)}
-            />
-          </div>
-          <Button onClick={handleZapierWebhook} disabled={loading}>
-            {loading ? 'Enviando...' : 'Testar Integração'}
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            Configure um Zap para coletar feedbacks via WhatsApp e armazená-los automaticamente.
-          </p>
-        </CardContent>
-      </Card>
 
       {/* Alertas de Feedbacks Negativos */}
       {negativeFeedbacks.length > 0 && (
