@@ -73,7 +73,7 @@ const Feedbacks = () => {
           .slice(0, 5);
 
         setSentimentMetrics({
-          avgSentiment: Math.round(avgSentiment * 100) / 100,
+          avgSentiment: Math.round(avgSentiment * 10) / 10,
           totalAnalyzed: data.filter(f => f.comentario).length,
           topKeywords,
         });
