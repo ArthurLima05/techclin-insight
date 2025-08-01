@@ -314,12 +314,12 @@ const Doutores = () => {
                       <span className="text-xs">Ativo</span>
                     </div>
                     
-                    <div className="flex space-x-1">
+                    <div className="flex justify-center space-x-1">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleEdit(doutor)}
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 flex items-center justify-center"
                       >
                         <Edit className="w-3 h-3" />
                       </Button>
@@ -327,7 +327,7 @@ const Doutores = () => {
                         size="sm"
                         variant="destructive"
                         onClick={() => handleDelete(doutor.id)}
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 flex items-center justify-center"
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
