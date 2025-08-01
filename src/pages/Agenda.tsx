@@ -152,20 +152,22 @@ const Agenda = () => {
       <div className="grid gap-8 lg:grid-cols-12">
         {/* Calendário */}
         <div className="lg:col-span-4">
-          <Card className="h-fit shadow-lg">
+          <Card className="h-fit shadow-lg overflow-hidden">
             <CardHeader className="bg-primary/5 rounded-t-lg">
               <CardTitle className="flex items-center gap-2 text-primary">
                 <CalendarIcon className="h-5 w-5" />
                 Calendário
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                className="rounded-md border w-full"
-              />
+            <CardContent className="p-4">
+              <div className="w-full overflow-hidden">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  className="rounded-md border w-full max-w-full [&>div]:w-full [&_table]:w-full [&_table]:table-fixed"
+                />
+              </div>
             </CardContent>
           </Card>
         </div>
