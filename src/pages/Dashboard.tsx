@@ -22,7 +22,6 @@ const Dashboard = () => {
     professionalVolume: {} as Record<string, number>,
     avgSentiment: 0,
     topKeywords: [] as { palavra: string; freq: number }[],
-    topServices: [] as { servico: string; count: number }[],
   });
 
   const COLORS = ['#1d4640', '#fd9b64', '#e6e6d7', '#8884d8'];
@@ -66,7 +65,7 @@ const Dashboard = () => {
       let avgWaitTime = 0;
       let origins = {} as Record<string, number>;
       let professionalVolume = {} as Record<string, number>;
-      let topServices: { servico: string; count: number }[] = [];
+      
 
       // Buscar agendamentos apenas se a agenda estiver ativa
       if (clinic?.agenda_ativa) {
@@ -93,16 +92,6 @@ const Dashboard = () => {
           return acc;
         }, {} as Record<string, number>) || {};
 
-        // Contar serviços mais consultados
-        const serviceCount = appointments?.reduce((acc, apt) => {
-          acc[apt.tipo_servico] = (acc[apt.tipo_servico] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>) || {};
-
-        topServices = Object.entries(serviceCount)
-          .map(([servico, count]) => ({ servico, count }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 5);
       }
 
       // Origem dos pacientes baseada nos feedbacks
@@ -162,7 +151,7 @@ const Dashboard = () => {
         professionalVolume,
         avgSentiment: Math.round(avgSentiment * 100) / 100, // 2 casas decimais
         topKeywords,
-        topServices,
+        
       });
 
     } catch (error) {
@@ -299,24 +288,6 @@ const Dashboard = () => {
         </Card>
 
 
-        {/* Gráfico de Serviços Mais Consultados */}
-        <Card className={clinic?.agenda_ativa ? "md:col-span-2" : ""}>
-          <CardHeader>
-            <CardTitle>Serviços Mais Consultados</CardTitle>
-            <CardDescription>Tipos de consulta mais frequentes</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={metrics.topServices} layout="horizontal">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="servico" type="category" width={100} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#1d4640" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
