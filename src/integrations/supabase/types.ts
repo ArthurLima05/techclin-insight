@@ -263,9 +263,21 @@ export type Database = {
         Args: { texto: string }
         Returns: number
       }
+      atualizar_metricas_diarias: {
+        Args: { clinica_uuid: string; data_agendamento: string }
+        Returns: undefined
+      }
+      calcular_volume_por_profissional: {
+        Args: { clinica_uuid: string; data_inicio: string; data_fim: string }
+        Returns: Json
+      }
       extrair_palavras_chave: {
         Args: { texto: string }
         Returns: string[]
+      }
+      validar_profissional_existe: {
+        Args: { profissional_nome: string; clinica_uuid: string }
+        Returns: boolean
       }
     }
     Enums: {
