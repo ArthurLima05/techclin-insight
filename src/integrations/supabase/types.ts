@@ -189,6 +189,7 @@ export type Database = {
           sentimento_medio: number | null
           taxa_retorno: number | null
           tempo_medio_agendamento: number | null
+          updated_at: string
           volume_por_profissional: Json | null
         }
         Insert: {
@@ -202,6 +203,7 @@ export type Database = {
           sentimento_medio?: number | null
           taxa_retorno?: number | null
           tempo_medio_agendamento?: number | null
+          updated_at?: string
           volume_por_profissional?: Json | null
         }
         Update: {
@@ -215,6 +217,7 @@ export type Database = {
           sentimento_medio?: number | null
           taxa_retorno?: number | null
           tempo_medio_agendamento?: number | null
+          updated_at?: string
           volume_por_profissional?: Json | null
         }
         Relationships: [
