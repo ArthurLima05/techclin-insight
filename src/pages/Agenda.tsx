@@ -75,6 +75,8 @@ const Agenda = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'agendado':
+        return 'secondary';
       case 'confirmado':
         return 'default';
       case 'realizado':
@@ -90,6 +92,7 @@ const Agenda = () => {
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
+      agendado: 'Agendado',
       confirmado: 'Confirmado',
       realizado: 'Realizado',
       cancelado: 'Cancelado',
