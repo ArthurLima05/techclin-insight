@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar as CalendarIcon, Clock, User, MapPin } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, MapPin, Plus, Edit3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useClinic } from '@/contexts/ClinicContext';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +25,22 @@ interface Appointment {
   status: string;
 }
 
+interface Medico {
+  id: string;
+  nome: string;
+  especialidade: string;
+}
+
+const appointmentSchema = z.object({
+  paciente: z.string().min(1, 'Nome do paciente é obrigatório'),
+  profissional: z.string().min(1, 'Profissional é obrigatório'),
+  data: z.string().min(1, 'Data é obrigatória'),
+  horario: z.string().min(1, 'Horário é obrigatório'),
+  status: z.string().min(1, 'Status é obrigatório'),
+});
+
+type AppointmentForm = z.infer<typeof appointmentSchema>;
+
 const Agenda = () => {
   const { clinic } = useClinic();
   const { toast } = useToast();
@@ -24,10 +48,25 @@ const Agenda = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
   const [selectedProfessional, setSelectedProfessional] = useState<string>('all');
+  const [medicos, setMedicos] = useState<Medico[]>([]);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+
+  const form = useForm<AppointmentForm>({
+    resolver: zodResolver(appointmentSchema),
+    defaultValues: {
+      paciente: '',
+      profissional: '',
+      data: '',
+      horario: '',
+      status: 'agendado',
+    },
+  });
 
   useEffect(() => {
     if (clinic) {
       fetchAppointments();
+      fetchMedicos();
     }
   }, [clinic]);
 
@@ -46,6 +85,123 @@ const Agenda = () => {
       toast({
         title: "Erro",
         description: "Erro ao carregar agendamentos",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchMedicos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('medicos')
+        .select('id, nome, especialidade')
+        .eq('clinica_id', clinic?.id)
+        .eq('ativo', true)
+        .order('nome');
+
+      if (error) throw error;
+      setMedicos(data || []);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar profissionais",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const onSubmit = async (data: AppointmentForm) => {
+    try {
+      if (editingAppointment) {
+        const { error } = await supabase
+          .from('agendamentos')
+          .update(data)
+          .eq('id', editingAppointment.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Sucesso",
+          description: "Agendamento atualizado com sucesso",
+        });
+      } else {
+        const appointmentData = {
+          paciente: data.paciente,
+          profissional: data.profissional,
+          data: data.data,
+          horario: data.horario,
+          status: data.status,
+          clinica_id: clinic?.id!
+        };
+        
+        const { error } = await supabase
+          .from('agendamentos')
+          .insert(appointmentData);
+
+        if (error) throw error;
+
+        toast({
+          title: "Sucesso",
+          description: "Agendamento criado com sucesso",
+        });
+      }
+
+      fetchAppointments();
+      setIsAddDialogOpen(false);
+      setEditingAppointment(null);
+      form.reset();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar agendamento",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = (appointment: Appointment) => {
+    setEditingAppointment(appointment);
+    form.reset({
+      paciente: appointment.paciente,
+      profissional: appointment.profissional,
+      data: appointment.data,
+      horario: appointment.horario,
+      status: appointment.status,
+    });
+    setIsAddDialogOpen(true);
+  };
+
+  const handleNewAppointment = () => {
+    setEditingAppointment(null);
+    form.reset({
+      paciente: '',
+      profissional: '',
+      data: '',
+      horario: '',
+      status: 'agendado',
+    });
+    setIsAddDialogOpen(true);
+  };
+
+  const updateAppointmentStatus = async (appointmentId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('agendamentos')
+        .update({ status: newStatus })
+        .eq('id', appointmentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Status atualizado com sucesso",
+      });
+
+      fetchAppointments();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar status",
         variant: "destructive",
       });
     }
@@ -179,14 +335,139 @@ const Agenda = () => {
         <div className="lg:col-span-8">
           <Card className="shadow-lg">
             <CardHeader className="bg-primary/5 rounded-t-lg">
-              <CardTitle className="flex items-center gap-2 text-primary">
-                <Clock className="h-5 w-5" />
-                Agendamentos
-                {selectedDate && (
-                  <span className="text-sm font-normal text-muted-foreground ml-2">
-                    - {viewMode === 'week' ? 'Esta semana' : selectedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-                  </span>
-                )}
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-primary">
+                  <Clock className="h-5 w-5" />
+                  Agendamentos
+                  {selectedDate && (
+                    <span className="text-sm font-normal text-muted-foreground ml-2">
+                      - {viewMode === 'week' ? 'Esta semana' : selectedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                    </span>
+                  )}
+                </div>
+                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={handleNewAppointment} size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Novo Agendamento
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingAppointment ? 'Editar Agendamento' : 'Novo Agendamento'}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="paciente"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Paciente</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Nome do paciente" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="profissional"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Profissional</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o profissional" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {medicos.map((medico) => (
+                                    <SelectItem key={medico.id} value={medico.nome}>
+                                      {medico.nome} - {medico.especialidade}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="data"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Data</FormLabel>
+                              <FormControl>
+                                <Input type="date" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="horario"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Horário</FormLabel>
+                              <FormControl>
+                                <Input type="time" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="status"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Status</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o status" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="agendado">Agendado</SelectItem>
+                                  <SelectItem value="confirmado">Confirmado</SelectItem>
+                                  <SelectItem value="cancelado">Cancelado</SelectItem>
+                                  <SelectItem value="realizado">Realizado</SelectItem>
+                                  <SelectItem value="falta">Falta</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsAddDialogOpen(false)}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button type="submit">
+                            {editingAppointment ? 'Atualizar' : 'Criar'}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -222,9 +503,30 @@ const Agenda = () => {
                                   <span>{appointment.profissional}</span>
                                 </div>
                               </div>
-                              <Badge variant={getStatusColor(appointment.status)} className="text-sm px-3 py-1">
-                                {getStatusLabel(appointment.status)}
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                <Select
+                                  value={appointment.status}
+                                  onValueChange={(value) => updateAppointmentStatus(appointment.id, value)}
+                                >
+                                  <SelectTrigger className="w-32 h-8">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="agendado">Agendado</SelectItem>
+                                    <SelectItem value="confirmado">Confirmado</SelectItem>
+                                    <SelectItem value="cancelado">Cancelado</SelectItem>
+                                    <SelectItem value="realizado">Realizado</SelectItem>
+                                    <SelectItem value="falta">Falta</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEdit(appointment)}
+                                >
+                                  <Edit3 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
                           </CardContent>
                         </Card>
