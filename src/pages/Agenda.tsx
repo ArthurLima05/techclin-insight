@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, Clock, User, MapPin, Plus, Edit3 } from 'lucide-react';
+import GoogleCalendarIntegration from '@/components/GoogleCalendarIntegration';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
@@ -134,11 +135,23 @@ const Agenda = () => {
           clinica_id: clinic?.id!
         };
         
-        const { error } = await supabase
+        const { data: newAgendamento, error } = await supabase
           .from('agendamentos')
-          .insert(appointmentData);
+          .insert(appointmentData)
+          .select()
+          .single();
 
         if (error) throw error;
+
+        // Sincronizar com Google Calendar (apenas para novos agendamentos)
+        try {
+          await supabase.functions.invoke('sync-to-google-calendar', {
+            body: { agendamento_id: newAgendamento.id }
+          });
+        } catch (syncError) {
+          console.warn('Erro ao sincronizar com Google Calendar:', syncError);
+          // Não mostrar erro para o usuário, o agendamento foi criado com sucesso
+        }
 
         toast({
           title: "Sucesso",
@@ -310,7 +323,7 @@ const Agenda = () => {
 
       <div className="grid gap-8 lg:grid-cols-12">
         {/* Calendário */}
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-4 space-y-6">
           <Card className="h-fit shadow-lg overflow-hidden">
             <CardHeader className="bg-primary/5 rounded-t-lg">
               <CardTitle className="flex items-center gap-2 text-primary">
@@ -329,6 +342,8 @@ const Agenda = () => {
               </div>
             </CardContent>
           </Card>
+          
+          <GoogleCalendarIntegration />
         </div>
 
         {/* Lista de Agendamentos */}
