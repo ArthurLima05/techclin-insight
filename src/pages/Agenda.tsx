@@ -419,9 +419,25 @@ const Agenda = () => {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Horário</FormLabel>
-                              <FormControl>
-                                <Input type="time" {...field} />
-                              </FormControl>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o horário" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {Array.from({ length: 24 }, (_, hour) => 
+                                    [0, 30].map(minutes => {
+                                      const timeString = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                                      return (
+                                        <SelectItem key={timeString} value={timeString}>
+                                          {timeString}
+                                        </SelectItem>
+                                      );
+                                    })
+                                  ).flat()}
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
