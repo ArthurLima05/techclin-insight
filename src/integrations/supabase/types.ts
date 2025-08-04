@@ -19,6 +19,7 @@ export type Database = {
           clinica_id: string
           created_at: string
           data: string
+          event_google_id: string | null
           horario: string
           id: string
           paciente: string
@@ -30,6 +31,7 @@ export type Database = {
           clinica_id: string
           created_at?: string
           data: string
+          event_google_id?: string | null
           horario: string
           id?: string
           paciente: string
@@ -41,6 +43,7 @@ export type Database = {
           clinica_id?: string
           created_at?: string
           data?: string
+          event_google_id?: string | null
           horario?: string
           id?: string
           paciente?: string
@@ -133,6 +136,47 @@ export type Database = {
             foreignKeyName: "feedbacks_clinica_id_fkey"
             columns: ["clinica_id"]
             isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      google_oauth_tokens: {
+        Row: {
+          access_token: string
+          clinica_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          refresh_token: string | null
+          scope: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          clinica_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          refresh_token?: string | null
+          scope: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          clinica_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          refresh_token?: string | null
+          scope?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_oauth_tokens_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: true
             referencedRelation: "clinicas"
             referencedColumns: ["id"]
           },
