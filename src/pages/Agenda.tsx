@@ -15,6 +15,7 @@ import * as z from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useClinic } from '@/contexts/ClinicContext';
 import { useToast } from '@/hooks/use-toast';
+import { GoogleCalendarIntegration } from '@/components/GoogleCalendarIntegration';
 
 interface Appointment {
   id: string;
@@ -307,6 +308,9 @@ const Agenda = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Integração Google Calendar */}
+      <GoogleCalendarIntegration />
 
       <div className="grid gap-8 lg:grid-cols-12">
         {/* Calendário */}
