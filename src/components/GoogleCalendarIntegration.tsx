@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
@@ -13,6 +13,26 @@ export const GoogleCalendarIntegration = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
+  useEffect(() => {
+    checkConnection();
+  }, [clinic]);
+
+  const checkConnection = async () => {
+    if (!clinic) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('google_oauth_tokens')
+        .select('id')
+        .eq('clinica_id', clinic.id)
+        .single();
+      
+      setIsConnected(!!data && !error);
+    } catch (error) {
+      setIsConnected(false);
+    }
+  };
+
   const handleGoogleAuth = async () => {
     if (!clinic) {
       toast({
@@ -26,8 +46,9 @@ export const GoogleCalendarIntegration = () => {
     setIsConnecting(true);
     
     try {
-      const clientId = "YOUR_GOOGLE_CLIENT_ID"; // Será configurado via secrets
-      const redirectUri = `${window.location.origin}/google-callback`;
+      // Client ID será configurado via secrets do Supabase
+      const clientId = "292930068833-8b7fkjl5dkjat3e7bb3t7k8vd9svcmvc.apps.googleusercontent.com";
+      const redirectUri = `https://scacnshkxfrahxarjrwb.supabase.co/functions/v1/google-oauth`;
       const scope = "https://www.googleapis.com/auth/calendar";
       
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
@@ -39,7 +60,7 @@ export const GoogleCalendarIntegration = () => {
         `access_type=offline&` +
         `prompt=consent`;
 
-      window.location.href = authUrl;
+      window.open(authUrl, '_blank', 'width=500,height=600');
     } catch (error) {
       console.error('Erro ao iniciar autenticação:', error);
       toast({
