@@ -46,8 +46,9 @@ export const GoogleCalendarIntegration = () => {
     setIsConnecting(true);
     
     try {
-      // Client ID será configurado via secrets do Supabase
-      const clientId = "292930068833-8b7fkjl5dkjat3e7bb3t7k8vd9svcmvc.apps.googleusercontent.com";
+      // Buscar o Client ID via Edge Function
+      const { data: configData } = await supabase.functions.invoke('get-google-config');
+      const clientId = configData?.clientId;
       const redirectUri = `https://scacnshkxfrahxarjrwb.supabase.co/functions/v1/google-oauth`;
       const scope = "https://www.googleapis.com/auth/calendar";
       
