@@ -6,7 +6,11 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useClinic } from "@/contexts/ClinicContext";
 
-export const GoogleCalendarIntegration = () => {
+interface GoogleCalendarIntegrationProps {
+  selectedCalendarId?: string;
+}
+
+export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: GoogleCalendarIntegrationProps) => {
   const { clinic } = useClinic();
   const { toast } = useToast();
   const [isConnecting, setIsConnecting] = useState(false);
@@ -39,6 +43,7 @@ export const GoogleCalendarIntegration = () => {
         title: "Erro",
         description: "Nenhuma clínica selecionada",
         variant: "destructive",
+        duration: 3000,
       });
       return;
     }
@@ -68,6 +73,7 @@ export const GoogleCalendarIntegration = () => {
         title: "Erro",
         description: "Falha ao conectar com Google Calendar",
         variant: "destructive",
+        duration: 3000,
       });
     } finally {
       setIsConnecting(false);
@@ -80,6 +86,7 @@ export const GoogleCalendarIntegration = () => {
         title: "Erro",
         description: "Nenhuma clínica selecionada",
         variant: "destructive",
+        duration: 3000,
       });
       return;
     }
@@ -90,7 +97,7 @@ export const GoogleCalendarIntegration = () => {
       const { data, error } = await supabase.functions.invoke('sync-google-calendar-advanced', {
         body: { 
           clinicaId: clinic.id,
-          calendarId: 'primary' // Por enquanto usa primary, depois pode ser parametrizado
+          calendarId: selectedCalendarId
         }
       });
 
@@ -99,12 +106,14 @@ export const GoogleCalendarIntegration = () => {
       toast({
         title: "Sucesso",
         description: data.message || "Agendamentos sincronizados com sucesso!",
+        duration: 3000,
       });
     } catch (error: any) {
       toast({
         title: "Erro",
         description: error.message || "Erro ao sincronizar agendamentos",
         variant: "destructive",
+        duration: 3000,
       });
     } finally {
       setIsSyncing(false);

@@ -89,6 +89,7 @@ const Agenda = () => {
         title: "Erro",
         description: "Erro ao carregar agendamentos",
         variant: "destructive",
+        duration: 3000,
       });
     }
   };
@@ -109,6 +110,7 @@ const Agenda = () => {
         title: "Erro",
         description: "Erro ao carregar profissionais",
         variant: "destructive",
+        duration: 3000,
       });
     }
   };
@@ -126,6 +128,7 @@ const Agenda = () => {
         toast({
           title: "Sucesso",
           description: "Agendamento atualizado com sucesso",
+          duration: 3000,
         });
       } else {
         const appointmentData = {
@@ -146,6 +149,7 @@ const Agenda = () => {
         toast({
           title: "Sucesso",
           description: "Agendamento criado com sucesso",
+          duration: 3000,
         });
       }
 
@@ -158,6 +162,7 @@ const Agenda = () => {
         title: "Erro",
         description: "Erro ao salvar agendamento",
         variant: "destructive",
+        duration: 3000,
       });
     }
   };
@@ -198,6 +203,7 @@ const Agenda = () => {
       toast({
         title: "Sucesso",
         description: "Status atualizado com sucesso",
+        duration: 3000,
       });
 
       fetchAppointments();
@@ -206,6 +212,7 @@ const Agenda = () => {
         title: "Erro",
         description: "Erro ao atualizar status",
         variant: "destructive",
+        duration: 3000,
       });
     }
   };
@@ -312,7 +319,7 @@ const Agenda = () => {
       </Card>
 
       {/* Integração Google Calendar */}
-      <GoogleCalendarIntegration />
+      <GoogleCalendarIntegration selectedCalendarId={selectedCalendarId} />
 
       <div className="grid gap-8 lg:grid-cols-12">
         {/* Calendário */}
