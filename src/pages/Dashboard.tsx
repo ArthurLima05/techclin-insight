@@ -81,29 +81,37 @@ const Dashboard = () => {
 
         // Calcular métricas de agendamentos
         totalAppointments = appointments?.length || 0;
-        completedAppointments = appointments?.filter(apt => apt.status === 'realizado').length || 0;
+        
+        // Contar atendimentos confirmados E realizados
+        completedAppointments = appointments?.filter(apt => 
+          apt.status === 'realizado' || apt.status === 'confirmado'
+        ).length || 0;
+        
         noShows = appointments?.filter(apt => apt.status === 'falta').length || 0;
         cancelledAppointments = appointments?.filter(apt => apt.status === 'cancelado').length || 0;
         
         // Taxa de retorno (simplificada)
         returnRate = totalAppointments > 0 ? (completedAppointments / totalAppointments) * 100 : 0;
-        avgWaitTime = 48; // Tempo médio simulado
 
-        // Calcular tempo médio de agendamento usando a nova função
-        const startDate = new Date();
-        startDate.setMonth(startDate.getMonth() - 1);
-        const endDate = new Date();
+        // Calcular tempo médio manualmente
+        let totalDias = 0;
+        let countAgendamentos = 0;
         
-        const { data: avgTimeData, error: avgTimeError } = await supabase
-          .rpc('calcular_tempo_medio_agendamento', {
-            clinica_uuid: clinic?.id,
-            data_inicio: startDate.toISOString().split('T')[0],
-            data_fim: endDate.toISOString().split('T')[0]
-          });
-
-        if (!avgTimeError && avgTimeData !== null) {
-          avgSchedulingTime = Math.round(avgTimeData * 100) / 100; // 2 casas decimais
-        }
+        appointments?.forEach(apt => {
+          if (apt.created_at && apt.data) {
+            const createdDate = new Date(apt.created_at);
+            const appointmentDate = new Date(apt.data);
+            const diffTime = appointmentDate.getTime() - createdDate.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays >= 0) { // Só contar agendamentos válidos
+              totalDias += diffDays;
+              countAgendamentos++;
+            }
+          }
+        });
+        
+        avgSchedulingTime = countAgendamentos > 0 ? Math.round((totalDias / countAgendamentos) * 100) / 100 : 0;
 
         // Volume por profissional
         professionalVolume = appointments?.reduce((acc, apt) => {
