@@ -51,7 +51,17 @@ const Login = () => {
         title: "Sucesso",
         description: `Bem-vindo à ${data.nome}!`,
       });
-      navigate('/dashboard');
+      
+      // Verificar se dashboard está ativo antes de redirecionar
+      if (data.dashboard_ativo) {
+        navigate('/dashboard');
+      } else if (data.agenda_ativa) {
+        navigate('/agenda');
+      } else if (data.feedbacks_ativos) {
+        navigate('/feedbacks');
+      } else {
+        navigate('/medicos');
+      }
     } catch (error) {
       toast({
         title: "Erro",

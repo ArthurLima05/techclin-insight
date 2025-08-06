@@ -22,3 +22,6 @@ verify_jwt = false
 
 [functions.get-google-config]
 verify_jwt = false
+
+[functions.sync-google-calendar-advanced]
+verify_jwt = false

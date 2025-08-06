@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar as CalendarIcon, Clock, User, MapPin, Plus, Edit3 } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Stethoscope, Plus, Edit3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useClinic } from '@/contexts/ClinicContext';
 import { useToast } from '@/hooks/use-toast';
 import { GoogleCalendarIntegration } from '@/components/GoogleCalendarIntegration';
+import GoogleCalendarSelector from '@/components/GoogleCalendarSelector';
 
 interface Appointment {
   id: string;
@@ -52,6 +53,7 @@ const Agenda = () => {
   const [medicos, setMedicos] = useState<Medico[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [selectedCalendarId, setSelectedCalendarId] = useState<string>('primary');
 
   const form = useForm<AppointmentForm>({
     resolver: zodResolver(appointmentSchema),
@@ -291,7 +293,7 @@ const Agenda = () => {
             </Select>
 
             <div className="flex items-center gap-2">
-              <User className="h-5 w-5 text-primary" />
+              <Stethoscope className="h-5 w-5 text-primary" />
               <span className="font-medium">Profissional:</span>
             </div>
             <Select value={selectedProfessional} onValueChange={setSelectedProfessional}>
@@ -472,6 +474,12 @@ const Agenda = () => {
                           )}
                         />
 
+                        {/* Seletor de Calendário Google */}
+                        <GoogleCalendarSelector 
+                          selectedCalendarId={selectedCalendarId}
+                          onCalendarChange={setSelectedCalendarId}
+                        />
+
                         <div className="flex justify-end gap-2 pt-4">
                           <Button
                             type="button"
@@ -519,7 +527,7 @@ const Agenda = () => {
                                   <span className="font-medium">{appointment.horario}</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-muted-foreground">
-                                  <MapPin className="h-4 w-4" />
+                                  <Stethoscope className="h-4 w-4" />
                                   <span>{appointment.profissional}</span>
                                 </div>
                               </div>
