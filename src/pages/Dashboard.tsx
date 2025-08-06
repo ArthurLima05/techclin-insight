@@ -13,11 +13,11 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [period, setPeriod] = useState('month');
   const [metrics, setMetrics] = useState({
-    totalAppointments: 0,
+    completedAppointments: 0, // Atendimentos realizados
     noShows: 0,
     returnRate: 0,
     avgWaitTime: 0,
-    avgSchedulingTime: 0, // Novo: tempo médio entre agendamento e consulta
+    avgSchedulingTime: 0, // Tempo médio entre agendamento e consulta
     cancelledAppointments: 0,
     origins: {} as Record<string, number>,
     professionalVolume: {} as Record<string, number>,
@@ -60,6 +60,7 @@ const Dashboard = () => {
   const fetchMetrics = async () => {
     try {
       let totalAppointments = 0;
+      let completedAppointments = 0;
       let noShows = 0;
       let cancelledAppointments = 0;
       let returnRate = 0;
@@ -80,9 +81,9 @@ const Dashboard = () => {
 
         // Calcular métricas de agendamentos
         totalAppointments = appointments?.length || 0;
+        completedAppointments = appointments?.filter(apt => apt.status === 'realizado').length || 0;
         noShows = appointments?.filter(apt => apt.status === 'falta').length || 0;
         cancelledAppointments = appointments?.filter(apt => apt.status === 'cancelado').length || 0;
-        const completedAppointments = appointments?.filter(apt => apt.status === 'realizado').length || 0;
         
         // Taxa de retorno (simplificada)
         returnRate = totalAppointments > 0 ? (completedAppointments / totalAppointments) * 100 : 0;
@@ -160,7 +161,7 @@ const Dashboard = () => {
       }
 
       setMetrics({
-        totalAppointments,
+        completedAppointments,
         noShows,
         returnRate: Math.round(returnRate),
         avgWaitTime,
@@ -205,9 +206,9 @@ const Dashboard = () => {
           <>
             <MetricCard
               title="Total de Atendimentos"
-              value={metrics.totalAppointments}
+              value={metrics.completedAppointments}
               icon={Users}
-              description="Agendamentos no período"
+              description="Consultas realizadas"
             />
             <MetricCard
               title="Faltas de Pacientes"
