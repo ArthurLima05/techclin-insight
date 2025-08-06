@@ -314,6 +314,10 @@ export type Database = {
         Args: { clinica_uuid: string; data_agendamento: string }
         Returns: undefined
       }
+      calcular_tempo_medio_agendamento: {
+        Args: { clinica_uuid: string; data_inicio: string; data_fim: string }
+        Returns: number
+      }
       calcular_volume_por_profissional: {
         Args: { clinica_uuid: string; data_inicio: string; data_fim: string }
         Returns: Json

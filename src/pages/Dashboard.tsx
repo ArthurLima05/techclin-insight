@@ -17,6 +17,7 @@ const Dashboard = () => {
     noShows: 0,
     returnRate: 0,
     avgWaitTime: 0,
+    avgSchedulingTime: 0, // Novo: tempo médio entre agendamento e consulta
     cancelledAppointments: 0,
     origins: {} as Record<string, number>,
     professionalVolume: {} as Record<string, number>,
@@ -63,6 +64,7 @@ const Dashboard = () => {
       let cancelledAppointments = 0;
       let returnRate = 0;
       let avgWaitTime = 0;
+      let avgSchedulingTime = 0;
       let origins = {} as Record<string, number>;
       let professionalVolume = {} as Record<string, number>;
       
@@ -85,6 +87,22 @@ const Dashboard = () => {
         // Taxa de retorno (simplificada)
         returnRate = totalAppointments > 0 ? (completedAppointments / totalAppointments) * 100 : 0;
         avgWaitTime = 48; // Tempo médio simulado
+
+        // Calcular tempo médio de agendamento usando a nova função
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+        const endDate = new Date();
+        
+        const { data: avgTimeData, error: avgTimeError } = await supabase
+          .rpc('calcular_tempo_medio_agendamento', {
+            clinica_uuid: clinic?.id,
+            data_inicio: startDate.toISOString().split('T')[0],
+            data_fim: endDate.toISOString().split('T')[0]
+          });
+
+        if (!avgTimeError && avgTimeData !== null) {
+          avgSchedulingTime = Math.round(avgTimeData * 100) / 100; // 2 casas decimais
+        }
 
         // Volume por profissional
         professionalVolume = appointments?.reduce((acc, apt) => {
@@ -146,12 +164,12 @@ const Dashboard = () => {
         noShows,
         returnRate: Math.round(returnRate),
         avgWaitTime,
+        avgSchedulingTime,
         cancelledAppointments,
         origins,
         professionalVolume,
         avgSentiment: Math.round(avgSentiment * 100) / 100, // 2 casas decimais
         topKeywords,
-        
       });
 
     } catch (error) {
@@ -205,7 +223,7 @@ const Dashboard = () => {
             />
             <MetricCard
               title="Tempo Médio"
-              value={`${metrics.avgWaitTime}h`}
+              value={`${metrics.avgSchedulingTime} dias`}
               icon={Clock}
               description="Entre agendamento e consulta"
             />

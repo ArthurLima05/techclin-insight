@@ -85,25 +85,25 @@ export const GoogleCalendarIntegration = () => {
     }
 
     setIsSyncing(true);
-    
     try {
-      const { data, error } = await supabase.functions.invoke('sync-google-calendar', {
-        body: { clinicaId: clinic.id }
+      // Usar a nova edge function com correção de data
+      const { data, error } = await supabase.functions.invoke('sync-google-calendar-advanced', {
+        body: { 
+          clinicaId: clinic.id,
+          calendarId: 'primary' // Por enquanto usa primary, depois pode ser parametrizado
+        }
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
-        title: "Sincronização concluída",
-        description: data.message,
+        title: "Sucesso",
+        description: data.message || "Agendamentos sincronizados com sucesso!",
       });
-    } catch (error) {
-      console.error('Erro na sincronização:', error);
+    } catch (error: any) {
       toast({
         title: "Erro",
-        description: "Falha na sincronização com Google Calendar",
+        description: error.message || "Erro ao sincronizar agendamentos",
         variant: "destructive",
       });
     } finally {
