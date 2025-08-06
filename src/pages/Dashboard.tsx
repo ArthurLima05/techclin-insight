@@ -72,7 +72,6 @@ const Dashboard = () => {
       // Calcular datas baseado no período selecionado
       const now = new Date();
       let startDate: Date;
-      let endDate = new Date();
       
       switch (period) {
         case 'week':
@@ -98,8 +97,7 @@ const Dashboard = () => {
           .from('agendamentos')
           .select('*')
           .eq('clinica_id', clinic?.id)
-          .gte('data', startDate.toISOString().split('T')[0])
-          .lte('data', endDate.toISOString().split('T')[0]);
+          .gte('created_at', startDate.toISOString());
 
         if (appointmentsError) throw appointmentsError;
 
