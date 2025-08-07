@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 const Dashboard = () => {
   const { clinic } = useClinic();
   const { toast } = useToast();
-  
+
   const [metrics, setMetrics] = useState({
     completedAppointments: 0, // Atendimentos realizados
     noShows: 0,
@@ -68,7 +68,7 @@ const Dashboard = () => {
       let avgSchedulingTime = 0;
       let origins = {} as Record<string, number>;
       let professionalVolume = {} as Record<string, number>;
-      
+
 
       // Buscar agendamentos apenas se a agenda estiver ativa
       if (clinic?.agenda_ativa) {
@@ -81,36 +81,36 @@ const Dashboard = () => {
 
         // Calcular métricas de agendamentos
         totalAppointments = appointments?.length || 0;
-        
+
         // Contar atendimentos confirmados E realizados
-        completedAppointments = appointments?.filter(apt => 
+        completedAppointments = appointments?.filter(apt =>
           apt.status === 'realizado' || apt.status === 'confirmado'
         ).length || 0;
-        
+
         noShows = appointments?.filter(apt => apt.status === 'falta').length || 0;
         cancelledAppointments = appointments?.filter(apt => apt.status === 'cancelado').length || 0;
-        
+
         // Taxa de retorno (simplificada)
         returnRate = totalAppointments > 0 ? (completedAppointments / totalAppointments) * 100 : 0;
 
         // Calcular tempo médio manualmente
         let totalDias = 0;
         let countAgendamentos = 0;
-        
+
         appointments?.forEach(apt => {
           if (apt.created_at && apt.data) {
             const createdDate = new Date(apt.created_at);
             const appointmentDate = new Date(apt.data);
             const diffTime = appointmentDate.getTime() - createdDate.getTime();
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
+
             if (diffDays >= 0) { // Só contar agendamentos válidos
               totalDias += diffDays;
               countAgendamentos++;
             }
           }
         });
-        
+
         avgSchedulingTime = countAgendamentos > 0 ? Math.round((totalDias / countAgendamentos) * 100) / 100 : 0;
 
         // Volume por profissional
@@ -228,7 +228,7 @@ const Dashboard = () => {
             />
           </>
         )}
-        
+
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -237,7 +237,7 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Cancelamentos por Mês
+                Cancelamentos Totais
               </CardTitle>
             </CardHeader>
             <CardContent>
