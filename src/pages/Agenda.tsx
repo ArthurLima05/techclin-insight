@@ -17,7 +17,7 @@ import { useClinic } from '@/contexts/ClinicContext';
 import { useToast } from '@/hooks/use-toast';
 import { GoogleCalendarIntegration } from '@/components/GoogleCalendarIntegration';
 import GoogleCalendarSelector from '@/components/GoogleCalendarSelector';
-
+import { parse } from 'date-fns';
 interface Appointment {
   id: string;
   paciente: string;
@@ -224,7 +224,7 @@ const Agenda = () => {
       return false;
     }
     if (selectedDate) {
-      const aptDate = new Date(apt.data);
+      const aptDate = parse(apt.data, 'yyyy-MM-dd', new Date());
       if (viewMode === 'week') {
         const startOfWeek = new Date(selectedDate);
         startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
@@ -512,11 +512,11 @@ const Agenda = () => {
                     <div className="flex items-center gap-3 pb-2 border-b">
                       <div className="w-3 h-3 rounded-full bg-primary"></div>
                       <h4 className="font-semibold text-lg text-primary">
-                        {new Date(date).toLocaleDateString('pt-BR', { 
-                          weekday: 'long', 
-                          day: 'numeric', 
-                          month: 'long' 
-                        })}
+                         {parse(date, 'yyyy-MM-dd', new Date()).toLocaleDateString('pt-BR', { 
+                           weekday: 'long', 
+                           day: 'numeric', 
+                           month: 'long' 
+                         })}
                       </h4>
                     </div>
                     <div className="grid gap-3">
