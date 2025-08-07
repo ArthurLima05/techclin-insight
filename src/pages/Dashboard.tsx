@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, UserCheck, Clock, TrendingUp, Calendar, AlertTriangle, Heart, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import MetricCard from '@/components/dashboard/MetricCard';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 const Dashboard = () => {
   const { clinic } = useClinic();
   const { toast } = useToast();
-  const [period, setPeriod] = useState('month');
+  
   const [metrics, setMetrics] = useState({
     completedAppointments: 0, // Atendimentos realizados
     noShows: 0,
@@ -55,7 +55,7 @@ const Dashboard = () => {
     if (clinic) {
       fetchMetrics();
     }
-  }, [clinic, period]);
+  }, [clinic]);
 
   const fetchMetrics = async () => {
     try {
@@ -197,16 +197,6 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
           <p className="text-muted-foreground">Visão geral das métricas da clínica</p>
         </div>
-        <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Período" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="week">Esta semana</SelectItem>
-            <SelectItem value="month">Este mês</SelectItem>
-            <SelectItem value="year">Este ano</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
