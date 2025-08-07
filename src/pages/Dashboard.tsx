@@ -69,37 +69,13 @@ const Dashboard = () => {
       let origins = {} as Record<string, number>;
       let professionalVolume = {} as Record<string, number>;
       
-      // Calcular datas baseado no período selecionado
-      const now = new Date();
-      let startDate: Date;
-      let endDate = new Date();
-      
-      switch (period) {
-        case 'week':
-          startDate = new Date(now);
-          startDate.setDate(now.getDate() - 7);
-          break;
-        case 'month':
-          startDate = new Date(now);
-          startDate.setMonth(now.getMonth() - 1);
-          break;
-        case 'year':
-          startDate = new Date(now);
-          startDate.setFullYear(now.getFullYear() - 1);
-          break;
-        default:
-          startDate = new Date(now);
-          startDate.setMonth(now.getMonth() - 1);
-      }
 
       // Buscar agendamentos apenas se a agenda estiver ativa
       if (clinic?.agenda_ativa) {
         const { data: appointments, error: appointmentsError } = await supabase
           .from('agendamentos')
           .select('*')
-          .eq('clinica_id', clinic?.id)
-          .gte('data', startDate.toISOString().split('T')[0])
-          .lte('data', endDate.toISOString().split('T')[0]);
+          .eq('clinica_id', clinic?.id);
 
         if (appointmentsError) throw appointmentsError;
 
