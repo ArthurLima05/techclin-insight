@@ -18,8 +18,6 @@ import { useToast } from '@/hooks/use-toast';
 import { GoogleCalendarIntegration } from '@/components/GoogleCalendarIntegration';
 import GoogleCalendarSelector from '@/components/GoogleCalendarSelector';
 import { parse } from 'date-fns';
-import { useIsMobile } from '@/hooks/use-mobile';
-import DateStrip from '@/components/mobile/DateStrip';
 interface Appointment {
   id: string;
   paciente: string;
@@ -56,7 +54,7 @@ const Agenda = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [selectedCalendarId, setSelectedCalendarId] = useState<string>('primary');
-  const isMobile = useIsMobile();
+  
 
   const form = useForm<AppointmentForm>({
     resolver: zodResolver(appointmentSchema),
@@ -278,7 +276,7 @@ const Agenda = () => {
   }, {} as Record<string, Appointment[]>);
 
   return (
-    <div className="container mx-auto p-6 space-y-8 overflow-x-hidden">
+    <div className="container mx-auto p-6 space-y-8">
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-bold text-primary">Agenda</h1>
         <p className="text-muted-foreground text-lg">Gestão de agendamentos e calendário</p>
@@ -327,7 +325,7 @@ const Agenda = () => {
       <div className="grid gap-8 lg:grid-cols-12">
         {/* Calendário */}
         <div className="lg:col-span-4">
-          <Card className="h-fit shadow-lg overflow-hidden">
+          <Card className="h-fit shadow-lg overflow-visible sm:overflow-hidden">
             <CardHeader className="bg-primary/5 rounded-t-lg">
               <CardTitle className="flex items-center gap-2 text-primary">
                 <CalendarIcon className="h-5 w-5" />
@@ -335,17 +333,13 @@ const Agenda = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="w-full overflow-hidden">
-                {isMobile ? (
-                  <DateStrip selected={selectedDate} onSelect={(d) => d && setSelectedDate(d)} />
-                ) : (
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    className="rounded-md border w-full"
-                  />
-                )}
+              <div className="w-full overflow-visible">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  className="rounded-md border w-full"
+                />
               </div>
             </CardContent>
           </Card>
@@ -513,7 +507,7 @@ const Agenda = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="space-y-6 max-h-[600px] overflow-y-auto">
+              <div className="space-y-6 max-h-none overflow-visible sm:max-h-[600px] sm:overflow-y-auto">
                 {Object.entries(appointmentsByDate).map(([date, dayAppointments]) => (
                   <div key={date} className="space-y-4">
                     <div className="flex items-center gap-3 pb-2 border-b">
