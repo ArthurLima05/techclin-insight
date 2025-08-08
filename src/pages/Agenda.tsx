@@ -54,7 +54,6 @@ const Agenda = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [selectedCalendarId, setSelectedCalendarId] = useState<string>('primary');
-  
 
   const form = useForm<AppointmentForm>({
     resolver: zodResolver(appointmentSchema),
@@ -291,7 +290,7 @@ const Agenda = () => {
               <span className="font-medium">Visualização:</span>
             </div>
             <Select value={viewMode} onValueChange={(value: 'week' | 'month') => setViewMode(value)}>
-              <SelectTrigger className="w-full sm:w-40">
+              <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -305,7 +304,7 @@ const Agenda = () => {
               <span className="font-medium">Profissional:</span>
             </div>
             <Select value={selectedProfessional} onValueChange={setSelectedProfessional}>
-              <SelectTrigger className="w-full sm:w-56">
+              <SelectTrigger className="w-56">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -325,7 +324,7 @@ const Agenda = () => {
       <div className="grid gap-8 lg:grid-cols-12">
         {/* Calendário */}
         <div className="lg:col-span-4">
-          <Card className="h-fit shadow-lg overflow-visible sm:overflow-hidden">
+          <Card className="h-fit shadow-lg overflow-hidden">
             <CardHeader className="bg-primary/5 rounded-t-lg">
               <CardTitle className="flex items-center gap-2 text-primary">
                 <CalendarIcon className="h-5 w-5" />
@@ -333,12 +332,12 @@ const Agenda = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="w-full overflow-visible">
+              <div className="w-full overflow-hidden">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
-                  className="rounded-md border w-full"
+                  className="rounded-md border w-full max-w-full [&>div]:w-full [&_table]:w-full [&_table]:table-fixed"
                 />
               </div>
             </CardContent>
@@ -507,7 +506,7 @@ const Agenda = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="space-y-6 max-h-none overflow-visible sm:max-h-[600px] sm:overflow-y-auto">
+              <div className="space-y-6 max-h-[600px] overflow-y-auto">
                 {Object.entries(appointmentsByDate).map(([date, dayAppointments]) => (
                   <div key={date} className="space-y-4">
                     <div className="flex items-center gap-3 pb-2 border-b">
