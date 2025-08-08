@@ -27,14 +27,7 @@ const Dashboard = () => {
 
   const COLORS = ['#1d4640', '#fd9b64', '#e6e6d7', '#8884d8'];
 
-  const chartData = [
-    { name: 'Jan', agendamentos: 65, cancelamentos: 8 },
-    { name: 'Fev', agendamentos: 85, cancelamentos: 12 },
-    { name: 'Mar', agendamentos: 78, cancelamentos: 6 },
-    { name: 'Abr', agendamentos: 92, cancelamentos: 14 },
-    { name: 'Mai', agendamentos: 88, cancelamentos: 9 },
-    { name: 'Jun', agendamentos: 95, cancelamentos: 11 },
-  ];
+  const [chartData, setChartData] = useState<{ name: string; agendamentos: number; cancelamentos: number }[]>([]);
 
   const getOriginChartData = () => {
     return Object.entries(metrics.origins).map(([name, value], index) => ({
@@ -118,6 +111,31 @@ const Dashboard = () => {
           acc[apt.profissional] = (acc[apt.profissional] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {};
+
+        // Agendamentos vs Cancelamentos - últimos 6 meses (baseado na data do agendamento)
+        const now = new Date();
+        const months = Array.from({ length: 6 }, (_, i) => {
+          const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+          const name = d.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+          return { d, key, name };
+        });
+
+        const counts: Record<string, { total: number; cancelados: number }> = {};
+        appointments?.forEach((apt: any) => {
+          if (!apt.data) return;
+          const key = String(apt.data).slice(0, 7); // yyyy-MM
+          if (!counts[key]) counts[key] = { total: 0, cancelados: 0 };
+          counts[key].total += 1;
+          if (apt.status === 'cancelado') counts[key].cancelados += 1;
+        });
+
+        const dataset = months.map((m) => ({
+          name: m.name,
+          agendamentos: counts[m.key]?.total ?? 0,
+          cancelamentos: counts[m.key]?.cancelados ?? 0,
+        }));
+        setChartData(dataset);
 
       }
 
