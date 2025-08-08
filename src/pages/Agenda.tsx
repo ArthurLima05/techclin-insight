@@ -275,7 +275,7 @@ const Agenda = () => {
   }, {} as Record<string, Appointment[]>);
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <div className="container mx-auto p-4 sm:p-6 space-y-8 overflow-x-hidden">
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-bold text-primary">Agenda</h1>
         <p className="text-muted-foreground text-lg">Gestão de agendamentos e calendário</p>
@@ -290,7 +290,7 @@ const Agenda = () => {
               <span className="font-medium">Visualização:</span>
             </div>
             <Select value={viewMode} onValueChange={(value: 'week' | 'month') => setViewMode(value)}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -304,7 +304,7 @@ const Agenda = () => {
               <span className="font-medium">Profissional:</span>
             </div>
             <Select value={selectedProfessional} onValueChange={setSelectedProfessional}>
-              <SelectTrigger className="w-56">
+              <SelectTrigger className="w-full sm:w-56">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -321,7 +321,7 @@ const Agenda = () => {
       {/* Integração Google Calendar */}
       <GoogleCalendarIntegration selectedCalendarId={selectedCalendarId} />
 
-      <div className="grid gap-8 lg:grid-cols-12">
+      <div className="grid gap-8 lg:grid-cols-12 w-full overflow-x-hidden">
         {/* Calendário */}
         <div className="lg:col-span-4">
           <Card className="h-fit shadow-lg overflow-hidden">
@@ -331,7 +331,7 @@ const Agenda = () => {
                 Calendário
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-4">
+            <CardContent className="p-4 overflow-x-hidden">
               <div className="w-full overflow-hidden">
                 <Calendar
                   mode="single"
@@ -506,7 +506,7 @@ const Agenda = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="space-y-6 max-h-[600px] overflow-y-auto">
+              <div className="space-y-6 max-h-[600px] overflow-y-auto overflow-x-hidden">
                 {Object.entries(appointmentsByDate).map(([date, dayAppointments]) => (
                   <div key={date} className="space-y-4">
                     <div className="flex items-center gap-3 pb-2 border-b">
@@ -527,7 +527,7 @@ const Agenda = () => {
                               <div className="space-y-2 flex-1">
                                 <div className="flex items-center gap-3">
                                   <User className="h-5 w-5 text-primary" />
-                                  <span className="font-semibold text-lg">{appointment.paciente}</span>
+                                  <span className="font-semibold text-lg break-words">{appointment.paciente}</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-muted-foreground">
                                   <Clock className="h-4 w-4" />
