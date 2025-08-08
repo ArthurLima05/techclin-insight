@@ -18,6 +18,8 @@ import { useToast } from '@/hooks/use-toast';
 import { GoogleCalendarIntegration } from '@/components/GoogleCalendarIntegration';
 import GoogleCalendarSelector from '@/components/GoogleCalendarSelector';
 import { parse } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
+import DateStrip from '@/components/mobile/DateStrip';
 interface Appointment {
   id: string;
   paciente: string;
@@ -54,6 +56,7 @@ const Agenda = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [selectedCalendarId, setSelectedCalendarId] = useState<string>('primary');
+  const isMobile = useIsMobile();
 
   const form = useForm<AppointmentForm>({
     resolver: zodResolver(appointmentSchema),
@@ -275,7 +278,7 @@ const Agenda = () => {
   }, {} as Record<string, Appointment[]>);
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <div className="container mx-auto p-6 space-y-8 overflow-x-hidden">
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-bold text-primary">Agenda</h1>
         <p className="text-muted-foreground text-lg">Gestão de agendamentos e calendário</p>
@@ -290,7 +293,7 @@ const Agenda = () => {
               <span className="font-medium">Visualização:</span>
             </div>
             <Select value={viewMode} onValueChange={(value: 'week' | 'month') => setViewMode(value)}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -304,7 +307,7 @@ const Agenda = () => {
               <span className="font-medium">Profissional:</span>
             </div>
             <Select value={selectedProfessional} onValueChange={setSelectedProfessional}>
-              <SelectTrigger className="w-56">
+              <SelectTrigger className="w-full sm:w-56">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -333,12 +336,16 @@ const Agenda = () => {
             </CardHeader>
             <CardContent className="p-4">
               <div className="w-full overflow-hidden">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  className="rounded-md border w-full max-w-full [&>div]:w-full [&_table]:w-full [&_table]:table-fixed"
-                />
+                {isMobile ? (
+                  <DateStrip selected={selectedDate} onSelect={(d) => d && setSelectedDate(d)} />
+                ) : (
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    className="rounded-md border w-full"
+                  />
+                )}
               </div>
             </CardContent>
           </Card>
