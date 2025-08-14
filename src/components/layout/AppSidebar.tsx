@@ -19,16 +19,16 @@ import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function AppSidebar() {
-  const { clinic, setClinic } = useClinic();
+  const { clinic, signOut } = useClinic();
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
   const handleLogout = () => {
-    setClinic(null);
+    signOut();
     toast({
-      title: "Logout realizado",
-      description: "Até logo!",
+      title: "Sessão Encerrada",
+      description: "Logout realizado com segurança. Até logo!",
     });
     navigate('/');
   };
