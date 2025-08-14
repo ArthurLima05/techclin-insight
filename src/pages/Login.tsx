@@ -4,73 +4,72 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { supabase } from '@/integrations/supabase/client';
 import { useClinic } from '@/contexts/ClinicContext';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Shield, AlertTriangle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
 
 const Login = () => {
   const [accessKey, setAccessKey] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setClinic } = useClinic();
   const { toast } = useToast();
-  const { 
-    authenticate, 
-    isLoading, 
-    isLockedOut, 
-    remainingLockoutTime, 
-    attemptsRemaining 
-  } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isLockedOut) {
+    if (!accessKey.trim()) {
       toast({
-        title: "Acesso Bloqueado",
-        description: `Tente novamente em ${remainingLockoutTime} minutos`,
+        title: "Erro",
+        description: "Por favor, insira a chave de acesso",
         variant: "destructive",
       });
       return;
     }
 
-    const result = await authenticate(accessKey);
-    
-    if (!result.success) {
-      toast({
-        title: "Erro de Autenticação",
-        description: result.error,
-        variant: "destructive",
-      });
-      
-      if (attemptsRemaining <= 1) {
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('clinicas')
+        .select('*')
+        .eq('chave_acesso', accessKey)
+        .single();
+
+      if (error || !data) {
         toast({
-          title: "Atenção",
-          description: "Próxima tentativa falhada resultará em bloqueio temporário",
+          title: "Erro",
+          description: "Chave de acesso inválida",
           variant: "destructive",
         });
+        return;
       }
-      return;
-    }
 
-    const clinic = result.clinic;
-    setClinic(clinic);
-    
-    toast({
-      title: "Acesso Autorizado",
-      description: `Bem-vindo à ${clinic.nome}!`,
-    });
-    
-    // Enhanced routing logic
-    if (clinic.dashboard_ativo) {
-      navigate('/dashboard');
-    } else if (clinic.agenda_ativa) {
-      navigate('/agenda');
-    } else if (clinic.feedbacks_ativos) {
-      navigate('/feedbacks');
-    } else {
-      navigate('/medicos');
+      setClinic(data);
+      toast({
+        title: "Sucesso",
+        description: `Bem-vindo à ${data.nome}!`,
+      });
+      
+      // Verificar se dashboard está ativo antes de redirecionar
+      if (data.dashboard_ativo) {
+        navigate('/dashboard');
+      } else if (data.agenda_ativa) {
+        navigate('/agenda');
+      } else if (data.feedbacks_ativos) {
+        navigate('/feedbacks');
+      } else {
+        navigate('/medicos');
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao conectar com o servidor",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -104,25 +103,6 @@ const Login = () => {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Security status indicators */}
-          {isLockedOut && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                Acesso temporariamente bloqueado. Tente novamente em {remainingLockoutTime} minutos.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {!isLockedOut && attemptsRemaining < 3 && (
-            <Alert variant="destructive">
-              <Shield className="h-4 w-4" />
-              <AlertDescription>
-                {attemptsRemaining} tentativa(s) restante(s) antes do bloqueio temporário.
-              </AlertDescription>
-            </Alert>
-          )}
-
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-3">
               <Label 
@@ -137,27 +117,20 @@ const Login = () => {
                 placeholder="Digite sua chave de acesso"
                 value={accessKey}
                 onChange={(e) => setAccessKey(e.target.value)}
-                disabled={isLoading || isLockedOut}
+                disabled={loading}
                 className="h-12 text-base transition-all duration-200 focus:scale-[1.02] focus:shadow-lg"
-                maxLength={50}
-                autoComplete="off"
               />
             </div>
             
             <Button 
               type="submit" 
               className="w-full h-12 text-base font-semibold transition-all duration-200 hover:scale-[1.02] hover:shadow-lg bg-primary hover:bg-primary/90" 
-              disabled={isLoading || isLockedOut}
+              disabled={loading}
             >
-              {isLoading ? (
+              {loading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Verificando acesso...
-                </>
-              ) : isLockedOut ? (
-                <>
-                  <Shield className="mr-2 h-5 w-5" />
-                  Acesso Bloqueado
+                  Entrando...
                 </>
               ) : (
                 'Entrar no Sistema'

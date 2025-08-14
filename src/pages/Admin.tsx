@@ -7,15 +7,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Trash2, Edit, Plus, AlertTriangle, Shield } from 'lucide-react';
-import { SecurityMonitor } from '@/components/SecurityMonitor';
+import { Trash2, Edit, Plus } from 'lucide-react';
 
-// SECURITY WARNING: This should be replaced with proper authentication
-const ADMIN_KEY = 'admin123'; // TODO: Replace with proper authentication system
+const ADMIN_KEY = 'admin123'; // Chave de acesso simples
 
 interface Clinica {
   id: string;
@@ -228,18 +225,6 @@ const Admin = () => {
           Sair
         </Button>
       </div>
-
-      {/* Security Warning */}
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Aviso de Segurança:</strong> Esta página utiliza autenticação hardcodada. 
-          Em produção, implemente um sistema de autenticação adequado com hash de senhas e JWT.
-        </AlertDescription>
-      </Alert>
-
-      {/* Security Monitor */}
-      <SecurityMonitor />
 
       {/* Seção Clínicas */}
       <Card>

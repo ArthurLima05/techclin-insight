@@ -5,9 +5,9 @@ import { AppSidebar } from './AppSidebar';
 import { useClinic } from '@/contexts/ClinicContext';
 
 const DashboardLayout = () => {
-  const { clinic } = useClinic();
+  const { isAuthenticated } = useClinic();
 
-  if (!clinic) {
+  if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 

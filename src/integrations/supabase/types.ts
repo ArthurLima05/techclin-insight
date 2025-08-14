@@ -61,59 +61,6 @@ export type Database = {
           },
         ]
       }
-      audit_logs: {
-        Row: {
-          action: string
-          clinica_id: string | null
-          created_at: string | null
-          id: string
-          ip_address: unknown | null
-          new_values: Json | null
-          old_values: Json | null
-          record_id: string | null
-          session_id: string | null
-          table_name: string | null
-          user_agent: string | null
-          user_id: string | null
-        }
-        Insert: {
-          action: string
-          clinica_id?: string | null
-          created_at?: string | null
-          id?: string
-          ip_address?: unknown | null
-          new_values?: Json | null
-          old_values?: Json | null
-          record_id?: string | null
-          session_id?: string | null
-          table_name?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          action?: string
-          clinica_id?: string | null
-          created_at?: string | null
-          id?: string
-          ip_address?: unknown | null
-          new_values?: Json | null
-          old_values?: Json | null
-          record_id?: string | null
-          session_id?: string | null
-          table_name?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "audit_logs_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "user_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       clinicas: {
         Row: {
           agenda_ativa: boolean
@@ -327,121 +274,6 @@ export type Database = {
           },
         ]
       }
-      rate_limits: {
-        Row: {
-          action: string
-          attempts: number | null
-          created_at: string | null
-          id: string
-          identifier: string
-          window_start: string | null
-        }
-        Insert: {
-          action: string
-          attempts?: number | null
-          created_at?: string | null
-          id?: string
-          identifier: string
-          window_start?: string | null
-        }
-        Update: {
-          action?: string
-          attempts?: number | null
-          created_at?: string | null
-          id?: string
-          identifier?: string
-          window_start?: string | null
-        }
-        Relationships: []
-      }
-      user_sessions: {
-        Row: {
-          created_at: string | null
-          expires_at: string
-          id: string
-          ip_address: unknown | null
-          session_token: string
-          user_agent: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          expires_at: string
-          id?: string
-          ip_address?: unknown | null
-          session_token: string
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          expires_at?: string
-          id?: string
-          ip_address?: unknown | null
-          session_token?: string
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_sessions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      users: {
-        Row: {
-          active: boolean | null
-          clinica_id: string | null
-          created_at: string | null
-          email: string
-          id: string
-          last_login: string | null
-          password_hash: string
-          password_reset_expires: string | null
-          password_reset_token: string | null
-          role: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          active?: boolean | null
-          clinica_id?: string | null
-          created_at?: string | null
-          email: string
-          id?: string
-          last_login?: string | null
-          password_hash: string
-          password_reset_expires?: string | null
-          password_reset_token?: string | null
-          role?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          active?: boolean | null
-          clinica_id?: string | null
-          created_at?: string | null
-          email?: string
-          id?: string
-          last_login?: string | null
-          password_hash?: string
-          password_reset_expires?: string | null
-          password_reset_token?: string | null
-          role?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "users_clinica_id_fkey"
-            columns: ["clinica_id"]
-            isOneToOne: false
-            referencedRelation: "clinicas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       whatsapp_clinicas: {
         Row: {
           ativo: boolean
@@ -490,38 +322,12 @@ export type Database = {
         Args: { clinica_uuid: string; data_inicio: string; data_fim: string }
         Returns: Json
       }
-      create_user_session: {
-        Args: { user_uuid: string; ip?: unknown; agent?: string }
-        Returns: string
-      }
       extrair_palavras_chave: {
         Args: { texto: string }
         Returns: string[]
       }
-      get_clinic_by_access_key: {
-        Args: { access_key: string }
-        Returns: {
-          id: string
-          nome: string
-          dashboard_ativo: boolean
-          feedbacks_ativos: boolean
-          agenda_ativa: boolean
-        }[]
-      }
-      hash_password: {
-        Args: { password: string }
-        Returns: string
-      }
       validar_profissional_existe: {
         Args: { profissional_nome: string; clinica_uuid: string }
-        Returns: boolean
-      }
-      validate_session: {
-        Args: { token: string }
-        Returns: string
-      }
-      verify_password: {
-        Args: { password: string; hash: string }
         Returns: boolean
       }
     }

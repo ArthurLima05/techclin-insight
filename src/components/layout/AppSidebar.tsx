@@ -27,8 +27,8 @@ export function AppSidebar() {
   const handleLogout = () => {
     setClinic(null);
     toast({
-      title: "Sessão Encerrada",
-      description: "Logout realizado com segurança. Até logo!",
+      title: "Logout realizado",
+      description: "Até logo!",
     });
     navigate('/');
   };
