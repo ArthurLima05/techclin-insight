@@ -8,21 +8,29 @@ const corsHeaders = {
 };
 
 async function refreshAccessToken(refreshToken: string) {
+  const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
+  const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+  
+  console.log('Tentando renovar token com Client ID:', clientId ? 'configurado' : 'não configurado');
+  console.log('Client Secret:', clientSecret ? 'configurado' : 'não configurado');
+  
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
-      client_id: Deno.env.get('GOOGLE_CLIENT_ID') ?? '',
-      client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET') ?? '',
+      client_id: clientId ?? '',
+      client_secret: clientSecret ?? '',
       refresh_token: refreshToken,
       grant_type: 'refresh_token',
     }),
   });
 
   if (!response.ok) {
-    throw new Error('Falha ao renovar token de acesso');
+    const errorText = await response.text();
+    console.error('Erro da API do Google:', errorText);
+    throw new Error(`Falha ao renovar token: ${response.status} - ${errorText}`);
   }
 
   return await response.json();
