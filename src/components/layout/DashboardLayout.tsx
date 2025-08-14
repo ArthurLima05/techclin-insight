@@ -2,10 +2,10 @@ import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
-import { useClinic } from '@/contexts/ClinicContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const DashboardLayout = () => {
-  const { isAuthenticated } = useClinic();
+  const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
