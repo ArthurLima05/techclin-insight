@@ -18,13 +18,34 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { code, state: clinicaId } = await req.json();
+    const body = await req.text();
+    console.log('Corpo da requisição recebido:', body);
+    
+    let parsedBody;
+    try {
+      parsedBody = JSON.parse(body);
+    } catch (parseError) {
+      console.error('Erro ao fazer parse do JSON:', parseError);
+      console.log('Corpo raw:', body);
+      throw new Error('Dados de requisição inválidos');
+    }
+
+    const { code, state: clinicaId } = parsedBody;
     
     if (!code || !clinicaId) {
       throw new Error('Código de autorização e ID da clínica são obrigatórios');
     }
 
     console.log('Recebido código OAuth para clínica:', clinicaId);
+
+    const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
+    const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    
+    console.log('Client ID:', clientId ? 'configurado' : 'não configurado');
+    console.log('Client Secret:', clientSecret ? 'configurado' : 'não configurado');
+    console.log('Supabase URL:', supabaseUrl);
+    console.log('Redirect URI:', `${supabaseUrl}/functions/v1/google-oauth`);
 
     // Trocar código por tokens
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -33,11 +54,11 @@ serve(async (req) => {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: Deno.env.get('GOOGLE_CLIENT_ID') ?? '',
-        client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET') ?? '',
+        client_id: clientId ?? '',
+        client_secret: clientSecret ?? '',
         code,
         grant_type: 'authorization_code',
-        redirect_uri: `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-oauth`,
+        redirect_uri: `${supabaseUrl}/functions/v1/google-oauth`,
       }),
     });
 
