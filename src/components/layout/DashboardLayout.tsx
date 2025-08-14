@@ -2,12 +2,12 @@ import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
-import { useAuth } from '@/contexts/AuthContext';
+import { useClinic } from '@/contexts/ClinicContext';
 
 const DashboardLayout = () => {
-  const { isAuthenticated } = useAuth();
+  const { clinic } = useClinic();
 
-  if (!isAuthenticated) {
+  if (!clinic) {
     return <Navigate to="/" replace />;
   }
 

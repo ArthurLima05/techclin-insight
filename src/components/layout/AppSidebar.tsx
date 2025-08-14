@@ -14,18 +14,18 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import { useClinic } from '@/contexts/ClinicContext';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function AppSidebar() {
-  const { clinic, signOut } = useAuth();
+  const { clinic, setClinic } = useClinic();
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
   const handleLogout = () => {
-    signOut();
+    setClinic(null);
     toast({
       title: "Sessão Encerrada",
       description: "Logout realizado com segurança. Até logo!",
