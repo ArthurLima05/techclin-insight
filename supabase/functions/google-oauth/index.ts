@@ -18,21 +18,16 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const body = await req.text();
-    console.log('Corpo da requisição recebido:', body);
+    const url = new URL(req.url);
+    const code = url.searchParams.get('code');
+    const clinicaId = url.searchParams.get('state');
     
-    let parsedBody;
-    try {
-      parsedBody = JSON.parse(body);
-    } catch (parseError) {
-      console.error('Erro ao fazer parse do JSON:', parseError);
-      console.log('Corpo raw:', body);
-      throw new Error('Dados de requisição inválidos');
-    }
-
-    const { code, state: clinicaId } = parsedBody;
+    console.log('URL da requisição:', req.url);
+    console.log('Código OAuth extraído:', code ? 'presente' : 'ausente');
+    console.log('ID da clínica extraído:', clinicaId);
     
     if (!code || !clinicaId) {
+      console.error('Código ou ID da clínica ausentes');
       throw new Error('Código de autorização e ID da clínica são obrigatórios');
     }
 
