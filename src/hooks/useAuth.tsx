@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,31 +21,36 @@ export const useAuth = () => {
   const [loginAttempts, setLoginAttempts] = useState<LoginAttempt>({ timestamp: 0, attempts: 0 });
   const { toast } = useToast();
 
-  // Check if user is locked out
-  const isLockedOut = () => {
+  // Memoized check if user is locked out
+  const isLockedOut = useMemo(() => {
     const now = Date.now();
     const timeSinceLastAttempt = now - loginAttempts.timestamp;
     
-    if (loginAttempts.attempts >= MAX_ATTEMPTS && timeSinceLastAttempt < LOCKOUT_DURATION) {
-      return true;
-    }
-    
-    // Reset attempts if lockout period has passed
-    if (timeSinceLastAttempt >= LOCKOUT_DURATION) {
-      setLoginAttempts({ timestamp: 0, attempts: 0 });
-    }
-    
-    return false;
-  };
+    return loginAttempts.attempts >= MAX_ATTEMPTS && timeSinceLastAttempt < LOCKOUT_DURATION;
+  }, [loginAttempts.attempts, loginAttempts.timestamp]);
 
-  // Get remaining lockout time
-  const getRemainingLockoutTime = () => {
+  // Memoized remaining lockout time
+  const remainingLockoutTime = useMemo(() => {
+    if (!isLockedOut) return 0;
+    
     const now = Date.now();
     const timeSinceLastAttempt = now - loginAttempts.timestamp;
     const remainingTime = LOCKOUT_DURATION - timeSinceLastAttempt;
     
     return Math.max(0, Math.ceil(remainingTime / 1000 / 60)); // minutes
-  };
+  }, [isLockedOut, loginAttempts.timestamp]);
+
+  // Effect to reset attempts when lockout period expires
+  useEffect(() => {
+    if (loginAttempts.attempts >= MAX_ATTEMPTS) {
+      const now = Date.now();
+      const timeSinceLastAttempt = now - loginAttempts.timestamp;
+      
+      if (timeSinceLastAttempt >= LOCKOUT_DURATION) {
+        setLoginAttempts({ timestamp: 0, attempts: 0 });
+      }
+    }
+  }, [loginAttempts.attempts, loginAttempts.timestamp]);
 
   // Validate access key format
   const validateAccessKey = (key: string): { valid: boolean; error?: string } => {
@@ -75,27 +80,26 @@ export const useAuth = () => {
   };
 
   // Record failed attempt
-  const recordFailedAttempt = () => {
+  const recordFailedAttempt = useCallback(() => {
     const now = Date.now();
     setLoginAttempts(prev => ({
       timestamp: now,
       attempts: prev.attempts + 1
     }));
-  };
+  }, []);
 
   // Reset attempts on successful login
-  const resetAttempts = () => {
+  const resetAttempts = useCallback(() => {
     setLoginAttempts({ timestamp: 0, attempts: 0 });
-  };
+  }, []);
 
   // Authenticate user with enhanced security
-  const authenticate = async (accessKey: string): Promise<AuthResult> => {
+  const authenticate = useCallback(async (accessKey: string): Promise<AuthResult> => {
     // Check if locked out
-    if (isLockedOut()) {
-      const remainingTime = getRemainingLockoutTime();
+    if (isLockedOut) {
       return {
         success: false,
-        error: `Muitas tentativas falharam. Tente novamente em ${remainingTime} minutos.`
+        error: `Muitas tentativas falharam. Tente novamente em ${remainingLockoutTime} minutos.`
       };
     }
 
@@ -152,10 +156,10 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isLockedOut, remainingLockoutTime, recordFailedAttempt, resetAttempts]);
 
   // Sign out user
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       // Clear any cached data
       resetAttempts();
@@ -166,14 +170,14 @@ export const useAuth = () => {
       console.error('Sign out error:', error);
       return { success: false, error: 'Erro ao sair do sistema' };
     }
-  };
+  }, [resetAttempts]);
 
   return {
     authenticate,
     signOut,
     isLoading,
-    isLockedOut: isLockedOut(),
-    remainingLockoutTime: getRemainingLockoutTime(),
+    isLockedOut,
+    remainingLockoutTime,
     attemptsRemaining: MAX_ATTEMPTS - loginAttempts.attempts
   };
 };
