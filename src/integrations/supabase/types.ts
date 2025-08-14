@@ -61,6 +61,51 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          clinica_id: string | null
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          session_id: string | null
+          table_name: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          clinica_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          session_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          clinica_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          session_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       clinicas: {
         Row: {
           agenda_ativa: boolean
@@ -325,6 +370,16 @@ export type Database = {
       extrair_palavras_chave: {
         Args: { texto: string }
         Returns: string[]
+      }
+      get_clinic_by_access_key: {
+        Args: { access_key: string }
+        Returns: {
+          id: string
+          nome: string
+          dashboard_ativo: boolean
+          feedbacks_ativos: boolean
+          agenda_ativa: boolean
+        }[]
       }
       validar_profissional_existe: {
         Args: { profissional_nome: string; clinica_uuid: string }
