@@ -75,7 +75,19 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
         `access_type=offline&` +
         `prompt=consent`;
 
-      window.open(authUrl, '_blank', 'width=500,height=600');
+      const authWindow = window.open(authUrl, '_blank', 'width=500,height=600');
+      
+      // Monitorar quando a janela de autenticação é fechada
+      const checkAuthWindow = setInterval(() => {
+        if (authWindow?.closed) {
+          clearInterval(checkAuthWindow);
+          // Aguardar um pouco e verificar a conexão
+          setTimeout(() => {
+            checkConnection();
+          }, 2000);
+        }
+      }, 1000);
+      
     } catch (error) {
       console.error('Erro ao iniciar autenticação:', error);
       toast({
