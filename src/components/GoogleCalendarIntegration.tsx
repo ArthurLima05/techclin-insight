@@ -29,17 +29,18 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
         .from('google_oauth_tokens')
         .select('id, expires_at')
         .eq('clinica_id', clinic.id)
-        .maybeSingle();
+        .single();
       
       if (error) {
-        console.error('Erro ao verificar conexão:', error);
+        console.log('Nenhum token encontrado ou erro:', error);
         setIsConnected(false);
         return;
       }
       
       // Verificar se o token existe e não está expirado
-      const isConnected = data && new Date(data.expires_at) > new Date();
-      setIsConnected(!!isConnected);
+      const tokenValid = data && new Date(data.expires_at) > new Date();
+      console.log('Token válido:', tokenValid, 'Expira em:', data?.expires_at);
+      setIsConnected(!!tokenValid);
     } catch (error) {
       console.error('Erro na verificação de conexão:', error);
       setIsConnected(false);
