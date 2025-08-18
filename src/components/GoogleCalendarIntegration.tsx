@@ -27,12 +27,21 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
     try {
       const { data, error } = await supabase
         .from('google_oauth_tokens')
-        .select('id')
+        .select('id, expires_at')
         .eq('clinica_id', clinic.id)
-        .single();
+        .maybeSingle();
       
-      setIsConnected(!!data && !error);
+      if (error) {
+        console.error('Erro ao verificar conexão:', error);
+        setIsConnected(false);
+        return;
+      }
+      
+      // Verificar se o token existe e não está expirado
+      const isConnected = data && new Date(data.expires_at) > new Date();
+      setIsConnected(!!isConnected);
     } catch (error) {
+      console.error('Erro na verificação de conexão:', error);
       setIsConnected(false);
     }
   };
