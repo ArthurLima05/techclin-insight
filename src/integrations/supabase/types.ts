@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -360,11 +360,11 @@ export type Database = {
         Returns: undefined
       }
       calcular_tempo_medio_agendamento: {
-        Args: { clinica_uuid: string; data_inicio: string; data_fim: string }
+        Args: { clinica_uuid: string; data_fim: string; data_inicio: string }
         Returns: number
       }
       calcular_volume_por_profissional: {
-        Args: { clinica_uuid: string; data_inicio: string; data_fim: string }
+        Args: { clinica_uuid: string; data_fim: string; data_inicio: string }
         Returns: Json
       }
       extrair_palavras_chave: {
@@ -374,15 +374,15 @@ export type Database = {
       get_clinic_by_access_key: {
         Args: { access_key: string }
         Returns: {
-          id: string
-          nome: string
+          agenda_ativa: boolean
           dashboard_ativo: boolean
           feedbacks_ativos: boolean
-          agenda_ativa: boolean
+          id: string
+          nome: string
         }[]
       }
       validar_profissional_existe: {
-        Args: { profissional_nome: string; clinica_uuid: string }
+        Args: { clinica_uuid: string; profissional_nome: string }
         Returns: boolean
       }
     }
