@@ -78,6 +78,8 @@ serve(async (req) => {
         refresh_token: tokens.refresh_token,
         expires_at: expiresAt,
         scope: tokens.scope || 'https://www.googleapis.com/auth/calendar',
+      }, {
+        onConflict: 'clinica_id'
       });
 
     if (dbError) {
