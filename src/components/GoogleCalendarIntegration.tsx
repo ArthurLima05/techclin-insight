@@ -22,25 +22,37 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
   }, [clinic]);
 
   const checkConnection = async () => {
-    if (!clinic) return;
+    if (!clinic) {
+      console.log('Nenhuma clínica selecionada');
+      return;
+    }
+    
+    console.log('Verificando conexão para clínica:', clinic.id);
     
     try {
       const { data, error } = await supabase
         .from('google_oauth_tokens')
-        .select('id, expires_at')
-        .eq('clinica_id', clinic.id)
-        .single();
+        .select('id, expires_at, clinica_id')
+        .eq('clinica_id', clinic.id);
+      
+      console.log('Resultado da query:', { data, error, clinicaId: clinic.id });
       
       if (error) {
-        console.log('Nenhum token encontrado ou erro:', error);
+        console.log('Erro ao buscar tokens:', error);
         setIsConnected(false);
         return;
       }
       
-      // Verificar se o token existe e não está expirado
-      const tokenValid = data && new Date(data.expires_at) > new Date();
-      console.log('Token válido:', tokenValid, 'Expira em:', data?.expires_at);
-      setIsConnected(!!tokenValid);
+      if (!data || data.length === 0) {
+        console.log('Nenhum token encontrado para esta clínica');
+        setIsConnected(false);
+        return;
+      }
+      
+      const token = data[0];
+      const tokenValid = new Date(token.expires_at) > new Date();
+      console.log('Token encontrado:', token, 'Válido:', tokenValid);
+      setIsConnected(tokenValid);
     } catch (error) {
       console.error('Erro na verificação de conexão:', error);
       setIsConnected(false);
