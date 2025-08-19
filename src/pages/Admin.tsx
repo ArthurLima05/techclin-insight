@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Trash2, Edit, Plus } from 'lucide-react';
 
-const ADMIN_KEY = 'admin123'; // Chave de acesso simples
+const ADMIN_KEY = 'Kx9Mn#8$vQ2@pL5!wR7z'; // Chave de acesso forte
 
 interface Clinica {
   id: string;
