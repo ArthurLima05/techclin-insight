@@ -56,9 +56,7 @@ const Login = () => {
         const userAuth = authData[0];
         
         if (userAuth.user_exists) {
-          // Forçar confirmação e fazer login
-          await supabase.rpc('force_confirm_user', { p_email: userAuth.email });
-          
+          // Fazer login direto com usuário existente
           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
             email: userAuth.email,
             password: userAuth.password
@@ -99,9 +97,8 @@ const Login = () => {
             return;
           }
 
-          // Criar perfil e confirmar usuário
+          // Criar perfil e fazer login automático
           if (signUpData.user) {
-            await supabase.rpc('force_confirm_user', { p_email: userAuth.email });
             await supabase.rpc('create_clinic_user_profile', {
               p_user_id: signUpData.user.id,
               p_email: userAuth.email,
