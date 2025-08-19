@@ -96,17 +96,15 @@ const Login = () => {
             });
             return;
           }
-        } else {
-          // Usuário criado com sucesso, criar perfil
-          if (signUpData.user) {
-            await supabase.rpc('create_clinic_user_profile', {
-              p_user_id: signUpData.user.id,
-              p_email: userAuth.email,
-              p_clinica_id: clinic.id,
-              p_full_name: `Usuario da ${clinic.nome}`
-            });
-          }
         }
+
+        // Garantir que o perfil existe após autenticação
+        await supabase.rpc('ensure_user_profile_on_login', {
+          p_clinic_id: clinic.id,
+          p_clinic_name: clinic.nome
+        });
+
+        console.log('Perfil de usuário garantido para clínica:', clinic.nome);
       }
 
       // Definir a clínica no contexto

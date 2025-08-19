@@ -432,6 +432,10 @@ export type Database = {
         Args: { clinic_uuid: string }
         Returns: string
       }
+      ensure_user_profile_on_login: {
+        Args: { p_clinic_id: string; p_clinic_name: string }
+        Returns: string
+      }
       extrair_palavras_chave: {
         Args: { texto: string }
         Returns: string[]
