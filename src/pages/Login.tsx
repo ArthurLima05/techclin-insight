@@ -32,12 +32,9 @@ const Login = () => {
 
     try {
       const { data, error } = await supabase
-        .from('clinicas')
-        .select('*')
-        .eq('chave_acesso', accessKey)
-        .single();
+        .rpc('get_clinic_by_access_key', { access_key: accessKey });
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         toast({
           title: "Erro",
           description: "Chave de acesso inválida",
@@ -46,18 +43,28 @@ const Login = () => {
         return;
       }
 
-      setClinic(data);
+      const clinic = data[0];
+
+      setClinic({
+        id: clinic.id,
+        nome: clinic.nome,
+        chave_acesso: accessKey,
+        dashboard_ativo: clinic.dashboard_ativo,
+        feedbacks_ativos: clinic.feedbacks_ativos,
+        agenda_ativa: clinic.agenda_ativa
+      });
+      
       toast({
         title: "Sucesso",
-        description: `Bem-vindo à ${data.nome}!`,
+        description: `Bem-vindo à ${clinic.nome}!`,
       });
       
       // Verificar se dashboard está ativo antes de redirecionar
-      if (data.dashboard_ativo) {
+      if (clinic.dashboard_ativo) {
         navigate('/dashboard');
-      } else if (data.agenda_ativa) {
+      } else if (clinic.agenda_ativa) {
         navigate('/agenda');
-      } else if (data.feedbacks_ativos) {
+      } else if (clinic.feedbacks_ativos) {
         navigate('/feedbacks');
       } else {
         navigate('/medicos');
