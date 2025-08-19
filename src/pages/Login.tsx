@@ -46,61 +46,7 @@ const Login = () => {
 
       const clinic = data[0];
 
-      // Obter dados de autenticação da clínica
-      const { data: authData } = await supabase.rpc('authenticate_clinic_user', {
-        p_clinica_id: clinic.id,
-        p_clinic_name: clinic.nome
-      });
-
-      if (authData && authData.length > 0) {
-        const userAuth = authData[0];
-        
-        // Tentar fazer login primeiro (usuário existente)
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email: userAuth.email,
-          password: userAuth.password
-        });
-
-        if (signInError) {
-          // Se login falhou, tentar criar usuário
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: userAuth.email,
-            password: userAuth.password,
-            options: {
-              emailRedirectTo: `${window.location.origin}/`,
-              data: {
-                clinic_id: clinic.id,
-                clinic_name: clinic.nome
-              }
-            }
-          });
-
-          if (signUpError) {
-            console.error('Erro ao criar usuário:', signUpError);
-            toast({
-              title: "Erro",
-              description: "Erro na autenticação",
-              variant: "destructive",
-            });
-            return;
-          }
-
-          console.log('Usuário criado com sucesso:', signUpData.user);
-        } else {
-          console.log('Login realizado com sucesso:', signInData.user);
-        }
-
-        // Garantir que o perfil existe após autenticação (com delay para garantir que auth.uid() esteja disponível)
-        setTimeout(async () => {
-          await supabase.rpc('ensure_user_profile_on_login', {
-            p_clinic_id: clinic.id,
-            p_clinic_name: clinic.nome
-          });
-          console.log('Perfil de usuário garantido para clínica:', clinic.nome);
-        }, 500);
-      }
-
-      // Definir a clínica no contexto
+      // Definir a clínica no contexto primeiro
       console.log('Login - Definindo clínica no contexto:', clinic);
       setClinic({
         id: clinic.id,
@@ -116,7 +62,13 @@ const Login = () => {
         description: `Bem-vindo à ${clinic.nome}!`,
       });
       
-      // Redirecionamento direto
+      console.log('Login - Redirecionando para:', 
+        clinic.dashboard_ativo ? '/dashboard' : 
+        clinic.agenda_ativa ? '/agenda' : 
+        clinic.feedbacks_ativos ? '/feedbacks' : '/medicos'
+      );
+      
+      // Redirecionamento direto sem autenticação complexa
       if (clinic.dashboard_ativo) {
         navigate('/dashboard');
       } else if (clinic.agenda_ativa) {

@@ -68,31 +68,26 @@ const Dashboard = () => {
       // Buscar agendamentos apenas se a agenda estiver ativa
       if (clinic?.agenda_ativa) {
         console.log('Dashboard - Buscando agendamentos para clinica:', clinic.id);
-        
-        // Consulta simplificada sem filtro de clínica para testar
         const { data: appointments, error: appointmentsError } = await supabase
           .from('agendamentos')
-          .select('*');
+          .select('*')
+          .eq('clinica_id', clinic?.id);
 
-        console.log('Dashboard - Todos os appointments:', appointments);
+        console.log('Dashboard - Appointments encontrados:', appointments);
         console.log('Dashboard - Appointments error:', appointmentsError);
-
-        // Filtrar apenas da clínica atual
-        const clinicAppointments = appointments?.filter(apt => apt.clinica_id === clinic.id) || [];
-        console.log('Dashboard - Appointments da clínica:', clinicAppointments);
 
         if (appointmentsError) throw appointmentsError;
 
         // Calcular métricas de agendamentos
-        totalAppointments = clinicAppointments?.length || 0;
+        totalAppointments = appointments?.length || 0;
 
         // Contar atendimentos confirmados E realizados
-        completedAppointments = clinicAppointments?.filter(apt =>
+        completedAppointments = appointments?.filter(apt =>
           apt.status === 'realizado' || apt.status === 'confirmado'
         ).length || 0;
 
-        noShows = clinicAppointments?.filter(apt => apt.status === 'falta').length || 0;
-        cancelledAppointments = clinicAppointments?.filter(apt => apt.status === 'cancelado').length || 0;
+        noShows = appointments?.filter(apt => apt.status === 'falta').length || 0;
+        cancelledAppointments = appointments?.filter(apt => apt.status === 'cancelado').length || 0;
 
         // Taxa de retorno (simplificada)
         returnRate = totalAppointments > 0 ? (completedAppointments / totalAppointments) * 100 : 0;
@@ -101,7 +96,7 @@ const Dashboard = () => {
         let totalDias = 0;
         let countAgendamentos = 0;
 
-        clinicAppointments?.forEach(apt => {
+        appointments?.forEach(apt => {
           if (apt.created_at && apt.data) {
             const createdDate = new Date(apt.created_at);
             const appointmentDate = new Date(apt.data);
@@ -118,7 +113,7 @@ const Dashboard = () => {
         avgSchedulingTime = countAgendamentos > 0 ? Math.round((totalDias / countAgendamentos) * 100) / 100 : 0;
 
         // Volume por profissional
-        professionalVolume = clinicAppointments?.reduce((acc, apt) => {
+        professionalVolume = appointments?.reduce((acc, apt) => {
           acc[apt.profissional] = (acc[apt.profissional] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {};
@@ -133,7 +128,7 @@ const Dashboard = () => {
         });
 
         const counts: Record<string, { total: number; cancelados: number }> = {};
-        clinicAppointments?.forEach((apt: any) => {
+        appointments?.forEach((apt: any) => {
           if (!apt.data) return;
           const key = String(apt.data).slice(0, 7); // yyyy-MM
           if (!counts[key]) counts[key] = { total: 0, cancelados: 0 };
@@ -151,20 +146,13 @@ const Dashboard = () => {
       }
 
       // Origem dos pacientes baseada nos feedbacks
-      const { data: allFeedbacks, error: feedbacksError } = await supabase
+      const { data: feedbackOrigins, error: originsError } = await supabase
         .from('feedbacks')
-        .select('*');
+        .select('como_conheceu')
+        .eq('clinica_id', clinic?.id)
+        .not('como_conheceu', 'is', null);
 
-      console.log('Dashboard - Todos os feedbacks:', allFeedbacks);
-      console.log('Dashboard - Feedbacks error:', feedbacksError);
-
-      // Filtrar feedbacks da clínica atual
-      const clinicFeedbacks = allFeedbacks?.filter(f => f.clinica_id === clinic?.id) || [];
-      console.log('Dashboard - Feedbacks da clínica:', clinicFeedbacks);
-
-      if (!feedbacksError && clinicFeedbacks) {
-        // Origem dos pacientes
-        const feedbackOrigins = clinicFeedbacks.filter(f => f.como_conheceu);
+      if (!originsError && feedbackOrigins) {
         origins = feedbackOrigins.reduce((acc, feedback) => {
           const origem = feedback.como_conheceu || 'Não informado';
           acc[origem] = (acc[origem] || 0) + 1;
@@ -172,16 +160,23 @@ const Dashboard = () => {
         }, {} as Record<string, number>);
       }
 
+      // Buscar feedbacks para análise de sentimento
+      const { data: feedbacks, error: feedbacksError } = await supabase
+        .from('feedbacks')
+        .select('sentimento, palavras_chave')
+        .eq('clinica_id', clinic?.id)
+        .not('sentimento', 'is', null);
+
       let avgSentiment = 0;
       let topKeywords: { palavra: string; freq: number }[] = [];
 
-      if (!feedbacksError && clinicFeedbacks?.length) {
+      if (!feedbacksError && feedbacks?.length) {
         // Calcular sentimento médio
-        const sentiments = clinicFeedbacks.map(f => f.sentimento).filter(s => s !== null);
+        const sentiments = feedbacks.map(f => f.sentimento).filter(s => s !== null);
         avgSentiment = sentiments.length > 0 ? sentiments.reduce((a, b) => a + b, 0) / sentiments.length : 0;
 
         // Contar palavras-chave
-        const keywordCount = clinicFeedbacks.reduce((acc, feedback) => {
+        const keywordCount = feedbacks.reduce((acc, feedback) => {
           if (feedback.palavras_chave && Array.isArray(feedback.palavras_chave)) {
             feedback.palavras_chave.forEach((palavra: string) => {
               acc[palavra] = (acc[palavra] || 0) + 1;

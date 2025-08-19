@@ -403,14 +403,6 @@ export type Database = {
         Args: { clinica_uuid: string; data_agendamento: string }
         Returns: undefined
       }
-      authenticate_clinic_user: {
-        Args: { p_clinic_name: string; p_clinica_id: string }
-        Returns: {
-          email: string
-          password: string
-          user_exists: boolean
-        }[]
-      }
       calcular_tempo_medio_agendamento: {
         Args: { clinica_uuid: string; data_fim: string; data_inicio: string }
         Returns: number
@@ -432,17 +424,9 @@ export type Database = {
         Args: { clinic_uuid: string }
         Returns: string
       }
-      ensure_user_profile_on_login: {
-        Args: { p_clinic_id: string; p_clinic_name: string }
-        Returns: string
-      }
       extrair_palavras_chave: {
         Args: { texto: string }
         Returns: string[]
-      }
-      force_confirm_user: {
-        Args: { p_email: string }
-        Returns: undefined
       }
       get_clinic_by_access_key: {
         Args: { access_key: string }
@@ -452,14 +436,6 @@ export type Database = {
           feedbacks_ativos: boolean
           id: string
           nome: string
-        }[]
-      }
-      get_or_create_clinic_user: {
-        Args: { p_clinic_name: string; p_clinica_id: string }
-        Returns: {
-          email: string
-          needs_signup: boolean
-          user_id: string
         }[]
       }
       get_user_clinica_id: {
