@@ -57,6 +57,51 @@ const Login = () => {
         agenda_ativa: clinic.agenda_ativa
       });
 
+      // Criar usuário fake simples
+      const fakeEmail = `user_${clinic.id}@clinic.com`;
+      const fakePassword = 'password123';
+
+      // Tentar fazer signup direto
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: fakeEmail,
+        password: fakePassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            clinic_id: clinic.id,
+            clinic_name: clinic.nome
+          }
+        }
+      });
+
+      if (authError && !authError.message.includes('already registered')) {
+        console.error('Erro na autenticação:', authError);
+        toast({
+          title: "Erro",
+          description: "Erro na autenticação",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const userId = authData?.user?.id;
+      if (!userId) {
+        toast({
+          title: "Erro", 
+          description: "Erro ao obter usuário",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Forçar criação do perfil diretamente
+      await supabase.rpc('create_clinic_user_profile', {
+        p_user_id: userId,
+        p_email: fakeEmail,
+        p_clinica_id: clinic.id,
+        p_full_name: `Usuario da ${clinic.nome}`
+      });
+
       toast({
         title: "Sucesso",
         description: `Bem-vindo à ${clinic.nome}!`,
