@@ -94,22 +94,22 @@ const Login = () => {
         return;
       }
 
-      // Criar/atualizar perfil para o usuário
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: authData.user.id,
-          email: fakeEmail,
-          clinica_id: clinic.id,
-          role: 'clinic_user',
-          full_name: `Usuario da ${clinic.nome}`,
-          active: true
-        }, {
-          onConflict: 'user_id'
-        });
+      // Criar/atualizar perfil para o usuário usando a função segura
+      const { error: profileError } = await supabase.rpc('create_clinic_user_profile', {
+        p_user_id: authData.user.id,
+        p_email: fakeEmail,
+        p_clinica_id: clinic.id,
+        p_full_name: `Usuario da ${clinic.nome}`
+      });
 
       if (profileError) {
         console.error('Erro ao criar perfil:', profileError);
+        toast({
+          title: "Erro",
+          description: "Erro ao criar perfil do usuário",
+          variant: "destructive",
+        });
+        return;
       }
 
       setClinic({
