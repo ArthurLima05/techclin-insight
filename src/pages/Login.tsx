@@ -46,20 +46,22 @@ const Login = () => {
 
       const clinic = data[0];
 
-      // Reutilizar usuário existente da clínica
-      const { data: existingUser } = await supabase.rpc('get_or_create_clinic_user', {
+      // Obter dados de autenticação da clínica
+      const { data: authData } = await supabase.rpc('authenticate_clinic_user', {
         p_clinica_id: clinic.id,
         p_clinic_name: clinic.nome
       });
 
-      if (existingUser && existingUser.length > 0) {
-        const userInfo = existingUser[0];
+      if (authData && authData.length > 0) {
+        const userAuth = authData[0];
         
-        if (!userInfo.needs_signup) {
-          // Fazer login com usuário existente
+        if (userAuth.user_exists) {
+          // Forçar confirmação e fazer login
+          await supabase.rpc('force_confirm_user', { p_email: userAuth.email });
+          
           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email: userInfo.email,
-            password: 'password123'
+            email: userAuth.email,
+            password: userAuth.password
           });
 
           if (signInError) {
@@ -74,10 +76,10 @@ const Login = () => {
 
           console.log('Login - Usuário autenticado:', signInData.user);
         } else {
-          // Criar novo usuário se necessário
+          // Criar novo usuário
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: userInfo.email,
-            password: 'password123',
+            email: userAuth.email,
+            password: userAuth.password,
             options: {
               emailRedirectTo: `${window.location.origin}/`,
               data: {
@@ -97,11 +99,12 @@ const Login = () => {
             return;
           }
 
-          // Criar perfil para o novo usuário
+          // Criar perfil e confirmar usuário
           if (signUpData.user) {
+            await supabase.rpc('force_confirm_user', { p_email: userAuth.email });
             await supabase.rpc('create_clinic_user_profile', {
               p_user_id: signUpData.user.id,
-              p_email: userInfo.email,
+              p_email: userAuth.email,
               p_clinica_id: clinic.id,
               p_full_name: `Usuario da ${clinic.nome}`
             });

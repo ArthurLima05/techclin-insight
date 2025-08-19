@@ -403,6 +403,14 @@ export type Database = {
         Args: { clinica_uuid: string; data_agendamento: string }
         Returns: undefined
       }
+      authenticate_clinic_user: {
+        Args: { p_clinic_name: string; p_clinica_id: string }
+        Returns: {
+          email: string
+          password: string
+          user_exists: boolean
+        }[]
+      }
       calcular_tempo_medio_agendamento: {
         Args: { clinica_uuid: string; data_fim: string; data_inicio: string }
         Returns: number
@@ -427,6 +435,10 @@ export type Database = {
       extrair_palavras_chave: {
         Args: { texto: string }
         Returns: string[]
+      }
+      force_confirm_user: {
+        Args: { p_email: string }
+        Returns: undefined
       }
       get_clinic_by_access_key: {
         Args: { access_key: string }
