@@ -55,39 +55,39 @@ const Login = () => {
       if (authData && authData.length > 0) {
         const userAuth = authData[0];
         
-        if (userAuth.user_exists) {
-          // Fazer login direto com usuário existente
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email: userAuth.email,
-            password: userAuth.password
-          });
-
-          if (signInError) {
-            console.error('Erro no login:', signInError);
-            toast({
-              title: "Erro",
-              description: "Erro na autenticação",
-              variant: "destructive",
-            });
-            return;
-          }
-
-          console.log('Login - Usuário autenticado:', signInData.user);
-        } else {
-          // Criar novo usuário
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: userAuth.email,
-            password: userAuth.password,
-            options: {
-              emailRedirectTo: `${window.location.origin}/`,
-              data: {
-                clinic_id: clinic.id,
-                clinic_name: clinic.nome
-              }
+        // Sempre tentar criar usuário primeiro
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: userAuth.email,
+          password: userAuth.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              clinic_id: clinic.id,
+              clinic_name: clinic.nome
             }
-          });
+          }
+        });
 
-          if (signUpError) {
+        if (signUpError) {
+          // Se der erro porque usuário já existe, tentar fazer login
+          if (signUpError.message.includes('already registered')) {
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+              email: userAuth.email,
+              password: userAuth.password
+            });
+
+            if (signInError) {
+              console.error('Erro no login:', signInError);
+              toast({
+                title: "Erro",
+                description: "Erro na autenticação",
+                variant: "destructive",
+              });
+              return;
+            }
+
+            console.log('Login - Usuário autenticado:', signInData.user);
+          } else {
             console.error('Erro ao criar usuário:', signUpError);
             toast({
               title: "Erro",
@@ -96,8 +96,8 @@ const Login = () => {
             });
             return;
           }
-
-          // Criar perfil e fazer login automático
+        } else {
+          // Usuário criado com sucesso, criar perfil
           if (signUpData.user) {
             await supabase.rpc('create_clinic_user_profile', {
               p_user_id: signUpData.user.id,
