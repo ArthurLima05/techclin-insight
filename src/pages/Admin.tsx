@@ -12,8 +12,6 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Trash2, Edit, Plus } from 'lucide-react';
 
-const ADMIN_KEY = 'Kx9Mn#8$vQ2@pL5!wR7z'; // Chave de acesso forte
-
 interface Clinica {
   id: string;
   nome: string;
@@ -33,6 +31,7 @@ interface WhatsappClinica {
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [adminKey, setAdminKey] = useState('');
   const [clinicas, setClinicas] = useState<Clinica[]>([]);
   const [whatsappClinicas, setWhatsappClinicas] = useState<WhatsappClinica[]>([]);
@@ -58,12 +57,35 @@ const Admin = () => {
     }
   });
 
-  const authenticate = () => {
-    if (adminKey === ADMIN_KEY) {
-      setIsAuthenticated(true);
-      loadData();
-    } else {
-      toast.error('Chave de acesso inválida');
+  const handleAdminAccess = async () => {
+    if (!adminKey.trim()) {
+      toast.error('Por favor, insira a senha de administrador');
+      return;
+    }
+
+    setIsAuthenticating(true);
+    
+    try {
+      const response = await supabase.functions.invoke('admin-auth', {
+        body: { password: adminKey }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.success) {
+        setIsAuthenticated(true);
+        loadData();
+        toast.success('Acesso autorizado');
+      } else {
+        toast.error('Senha de administrador inválida');
+      }
+    } catch (error) {
+      console.error('Erro na autenticação:', error);
+      toast.error('Erro ao verificar credenciais de administrador');
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
@@ -192,21 +214,26 @@ const Admin = () => {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Acesso Administrativo</CardTitle>
-            <CardDescription>Digite a chave de acesso para continuar</CardDescription>
+            <CardDescription>Digite a senha de administrador para continuar</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="adminKey">Chave de Acesso</Label>
+              <Label htmlFor="adminKey">Senha de Administrador</Label>
               <Input
                 id="adminKey"
                 type="password"
                 value={adminKey}
                 onChange={(e) => setAdminKey(e.target.value)}
-                placeholder="Digite a chave de acesso"
+                placeholder="Digite a senha de administrador"
+                onKeyPress={(e) => e.key === 'Enter' && !isAuthenticating && handleAdminAccess()}
               />
             </div>
-            <Button onClick={authenticate} className="w-full">
-              Entrar
+            <Button 
+              onClick={handleAdminAccess} 
+              className="w-full"
+              disabled={isAuthenticating}
+            >
+              {isAuthenticating ? 'Verificando...' : 'Entrar'}
             </Button>
           </CardContent>
         </Card>
