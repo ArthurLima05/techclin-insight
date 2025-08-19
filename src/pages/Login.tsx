@@ -46,7 +46,70 @@ const Login = () => {
 
       const clinic = data[0];
 
-      // Definir a clínica no contexto primeiro
+      // Reutilizar usuário existente da clínica
+      const { data: existingUser } = await supabase.rpc('get_or_create_clinic_user', {
+        p_clinica_id: clinic.id,
+        p_clinic_name: clinic.nome
+      });
+
+      if (existingUser && existingUser.length > 0) {
+        const userInfo = existingUser[0];
+        
+        if (!userInfo.needs_signup) {
+          // Fazer login com usuário existente
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: userInfo.email,
+            password: 'password123'
+          });
+
+          if (signInError) {
+            console.error('Erro no login:', signInError);
+            toast({
+              title: "Erro",
+              description: "Erro na autenticação",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          console.log('Login - Usuário autenticado:', signInData.user);
+        } else {
+          // Criar novo usuário se necessário
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email: userInfo.email,
+            password: 'password123',
+            options: {
+              emailRedirectTo: `${window.location.origin}/`,
+              data: {
+                clinic_id: clinic.id,
+                clinic_name: clinic.nome
+              }
+            }
+          });
+
+          if (signUpError) {
+            console.error('Erro ao criar usuário:', signUpError);
+            toast({
+              title: "Erro",
+              description: "Erro na autenticação",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          // Criar perfil para o novo usuário
+          if (signUpData.user) {
+            await supabase.rpc('create_clinic_user_profile', {
+              p_user_id: signUpData.user.id,
+              p_email: userInfo.email,
+              p_clinica_id: clinic.id,
+              p_full_name: `Usuario da ${clinic.nome}`
+            });
+          }
+        }
+      }
+
+      // Definir a clínica no contexto
       console.log('Login - Definindo clínica no contexto:', clinic);
       setClinic({
         id: clinic.id,
@@ -57,63 +120,12 @@ const Login = () => {
         agenda_ativa: clinic.agenda_ativa
       });
 
-      // Criar usuário fake simples
-      const fakeEmail = `user_${clinic.id}@clinic.com`;
-      const fakePassword = 'password123';
-
-      // Tentar fazer signup direto
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: fakeEmail,
-        password: fakePassword,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            clinic_id: clinic.id,
-            clinic_name: clinic.nome
-          }
-        }
-      });
-
-      if (authError && !authError.message.includes('already registered')) {
-        console.error('Erro na autenticação:', authError);
-        toast({
-          title: "Erro",
-          description: "Erro na autenticação",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const userId = authData?.user?.id;
-      if (!userId) {
-        toast({
-          title: "Erro", 
-          description: "Erro ao obter usuário",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Forçar criação do perfil diretamente
-      await supabase.rpc('create_clinic_user_profile', {
-        p_user_id: userId,
-        p_email: fakeEmail,
-        p_clinica_id: clinic.id,
-        p_full_name: `Usuario da ${clinic.nome}`
-      });
-
       toast({
         title: "Sucesso",
         description: `Bem-vindo à ${clinic.nome}!`,
       });
       
-      console.log('Login - Redirecionando para:', 
-        clinic.dashboard_ativo ? '/dashboard' : 
-        clinic.agenda_ativa ? '/agenda' : 
-        clinic.feedbacks_ativos ? '/feedbacks' : '/medicos'
-      );
-      
-      // Redirecionamento direto sem autenticação complexa
+      // Redirecionamento direto
       if (clinic.dashboard_ativo) {
         navigate('/dashboard');
       } else if (clinic.agenda_ativa) {

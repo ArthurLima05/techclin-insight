@@ -438,6 +438,14 @@ export type Database = {
           nome: string
         }[]
       }
+      get_or_create_clinic_user: {
+        Args: { p_clinic_name: string; p_clinica_id: string }
+        Returns: {
+          email: string
+          needs_signup: boolean
+          user_id: string
+        }[]
+      }
       get_user_clinica_id: {
         Args: Record<PropertyKey, never>
         Returns: string
