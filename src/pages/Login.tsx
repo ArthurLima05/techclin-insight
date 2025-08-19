@@ -46,11 +46,46 @@ const Login = () => {
 
       const clinic = data[0];
 
-      // Criar/autenticar usuário anônimo para esta clínica
-      const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
+      // Criar/autenticar usuário anônimo para esta clínica usando email fake
+      const fakeEmail = `clinic_${clinic.id}_${Date.now()}@temp.com`;
+      const fakePassword = 'temp123456'; // Senha temporária
 
-      if (authError) {
-        console.error('Erro na autenticação:', authError);
+      // Tentar fazer login ou criar conta
+      let authData;
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: fakeEmail,
+        password: fakePassword,
+      });
+
+      if (signInError) {
+        // Se não conseguir fazer login, criar nova conta
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: fakeEmail,
+          password: fakePassword,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              clinic_id: clinic.id,
+              clinic_name: clinic.nome
+            }
+          }
+        });
+
+        if (signUpError) {
+          console.error('Erro ao criar conta:', signUpError);
+          toast({
+            title: "Erro",
+            description: "Erro na autenticação",
+            variant: "destructive",
+          });
+          return;
+        }
+        authData = signUpData;
+      } else {
+        authData = signInData;
+      }
+
+      if (!authData.user) {
         toast({
           title: "Erro",
           description: "Erro na autenticação",
@@ -59,16 +94,18 @@ const Login = () => {
         return;
       }
 
-      // Criar perfil para o usuário anônimo
+      // Criar/atualizar perfil para o usuário
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           user_id: authData.user.id,
-          email: `clinic_${clinic.id}@temp.com`,
+          email: fakeEmail,
           clinica_id: clinic.id,
           role: 'clinic_user',
           full_name: `Usuario da ${clinic.nome}`,
           active: true
+        }, {
+          onConflict: 'user_id'
         });
 
       if (profileError) {
