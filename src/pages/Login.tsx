@@ -112,6 +112,7 @@ const Login = () => {
         return;
       }
 
+      console.log('Login - Definindo clínica no contexto:', clinic);
       setClinic({
         id: clinic.id,
         nome: clinic.nome,
@@ -126,16 +127,25 @@ const Login = () => {
         description: `Bem-vindo à ${clinic.nome}!`,
       });
       
-      // Verificar se dashboard está ativo antes de redirecionar
-      if (clinic.dashboard_ativo) {
-        navigate('/dashboard');
-      } else if (clinic.agenda_ativa) {
-        navigate('/agenda');
-      } else if (clinic.feedbacks_ativos) {
-        navigate('/feedbacks');
-      } else {
-        navigate('/medicos');
-      }
+      console.log('Login - Redirecionando para:', 
+        clinic.dashboard_ativo ? '/dashboard' : 
+        clinic.agenda_ativa ? '/agenda' : 
+        clinic.feedbacks_ativos ? '/feedbacks' : '/medicos'
+      );
+      
+      // Pequeno delay para garantir que o contexto foi atualizado
+      setTimeout(() => {
+        // Verificar se dashboard está ativo antes de redirecionar
+        if (clinic.dashboard_ativo) {
+          navigate('/dashboard');
+        } else if (clinic.agenda_ativa) {
+          navigate('/agenda');
+        } else if (clinic.feedbacks_ativos) {
+          navigate('/feedbacks');
+        } else {
+          navigate('/medicos');
+        }
+      }, 100);
     } catch (error) {
       console.error('Erro no login:', error);
       toast({

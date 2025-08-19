@@ -38,18 +38,24 @@ export const ClinicProvider: React.FC<ClinicProviderProps> = ({ children }) => {
   useEffect(() => {
     // Verificar se há usuário autenticado
     supabase.auth.getUser().then(({ data: { user } }) => {
+      console.log('ClinicContext - Usuario atual:', user);
       setUser(user);
     });
 
     // Escutar mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('ClinicContext - Auth state change:', event, session?.user);
         setUser(session?.user ?? null);
       }
     );
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    console.log('ClinicContext - Estado atual:', { clinic, user, isAuthenticated: !!clinic && !!user });
+  }, [clinic, user]);
 
   const value = {
     clinic,
