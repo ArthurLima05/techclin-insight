@@ -46,95 +46,7 @@ const Login = () => {
 
       const clinic = data[0];
 
-      // Criar/autenticar usuário anônimo para esta clínica usando email fake
-      const fakeEmail = `clinic_${clinic.id}_${Date.now()}@temp.com`;
-      const fakePassword = 'temp123456'; // Senha temporária
-
-      // Tentar fazer login ou criar conta
-      let authResult;
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: fakeEmail,
-        password: fakePassword,
-      });
-
-      if (signInError) {
-        // Se não conseguir fazer login, criar nova conta
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: fakeEmail,
-          password: fakePassword,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              clinic_id: clinic.id,
-              clinic_name: clinic.nome
-            }
-          }
-        });
-
-        if (signUpError) {
-          console.error('Erro ao criar conta:', signUpError);
-          toast({
-            title: "Erro",
-            description: "Erro na autenticação",
-            variant: "destructive",
-          });
-          return;
-        }
-        authResult = signUpData;
-      } else {
-        authResult = signInData;
-      }
-
-      if (!authResult.user) {
-        toast({
-          title: "Erro",
-          description: "Erro na autenticação",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Aguardar que a sessão seja estabelecida
-      let attempts = 0;
-      const maxAttempts = 10;
-      let session = null;
-      
-      while (attempts < maxAttempts && !session) {
-        const { data } = await supabase.auth.getSession();
-        session = data.session;
-        if (!session) {
-          await new Promise(resolve => setTimeout(resolve, 200));
-          attempts++;
-        }
-      }
-
-      if (!session) {
-        toast({
-          title: "Erro",
-          description: "Erro ao estabelecer sessão",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Criar/atualizar perfil para o usuário usando a função segura
-      const { error: profileError } = await supabase.rpc('create_clinic_user_profile', {
-        p_user_id: authResult.user.id,
-        p_email: fakeEmail,
-        p_clinica_id: clinic.id,
-        p_full_name: `Usuario da ${clinic.nome}`
-      });
-
-      if (profileError) {
-        console.error('Erro ao criar perfil:', profileError);
-        toast({
-          title: "Erro",
-          description: "Erro ao criar perfil do usuário",
-          variant: "destructive",
-        });
-        return;
-      }
-
+      // Definir a clínica no contexto primeiro
       console.log('Login - Definindo clínica no contexto:', clinic);
       setClinic({
         id: clinic.id,
@@ -144,7 +56,7 @@ const Login = () => {
         feedbacks_ativos: clinic.feedbacks_ativos,
         agenda_ativa: clinic.agenda_ativa
       });
-      
+
       toast({
         title: "Sucesso",
         description: `Bem-vindo à ${clinic.nome}!`,
@@ -156,19 +68,16 @@ const Login = () => {
         clinic.feedbacks_ativos ? '/feedbacks' : '/medicos'
       );
       
-      // Pequeno delay para garantir que o contexto foi atualizado
-      setTimeout(() => {
-        // Verificar se dashboard está ativo antes de redirecionar
-        if (clinic.dashboard_ativo) {
-          navigate('/dashboard');
-        } else if (clinic.agenda_ativa) {
-          navigate('/agenda');
-        } else if (clinic.feedbacks_ativos) {
-          navigate('/feedbacks');
-        } else {
-          navigate('/medicos');
-        }
-      }, 100);
+      // Redirecionamento direto sem autenticação complexa
+      if (clinic.dashboard_ativo) {
+        navigate('/dashboard');
+      } else if (clinic.agenda_ativa) {
+        navigate('/agenda');
+      } else if (clinic.feedbacks_ativos) {
+        navigate('/feedbacks');
+      } else {
+        navigate('/medicos');
+      }
     } catch (error) {
       console.error('Erro no login:', error);
       toast({
