@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Clinic {
   id: string;
@@ -13,6 +14,7 @@ interface ClinicContextType {
   clinic: Clinic | null;
   setClinic: (clinic: Clinic | null) => void;
   isAuthenticated: boolean;
+  user: any;
 }
 
 const ClinicContext = createContext<ClinicContextType | undefined>(undefined);
@@ -31,11 +33,29 @@ interface ClinicProviderProps {
 
 export const ClinicProvider: React.FC<ClinicProviderProps> = ({ children }) => {
   const [clinic, setClinic] = useState<Clinic | null>(null);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Verificar se há usuário autenticado
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    // Escutar mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const value = {
     clinic,
     setClinic,
-    isAuthenticated: !!clinic,
+    isAuthenticated: !!clinic && !!user,
+    user,
   };
 
   return (

@@ -31,6 +31,7 @@ const Login = () => {
     setLoading(true);
 
     try {
+      // Primeiro, buscar a clínica pela chave de acesso
       const { data, error } = await supabase
         .rpc('get_clinic_by_access_key', { access_key: accessKey });
 
@@ -44,6 +45,35 @@ const Login = () => {
       }
 
       const clinic = data[0];
+
+      // Criar/autenticar usuário anônimo para esta clínica
+      const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
+
+      if (authError) {
+        console.error('Erro na autenticação:', authError);
+        toast({
+          title: "Erro",
+          description: "Erro na autenticação",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Criar perfil para o usuário anônimo
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          user_id: authData.user.id,
+          email: `clinic_${clinic.id}@temp.com`,
+          clinica_id: clinic.id,
+          role: 'clinic_user',
+          full_name: `Usuario da ${clinic.nome}`,
+          active: true
+        });
+
+      if (profileError) {
+        console.error('Erro ao criar perfil:', profileError);
+      }
 
       setClinic({
         id: clinic.id,
@@ -70,6 +100,7 @@ const Login = () => {
         navigate('/medicos');
       }
     } catch (error) {
+      console.error('Erro no login:', error);
       toast({
         title: "Erro",
         description: "Erro ao conectar com o servidor",
