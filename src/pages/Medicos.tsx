@@ -36,12 +36,18 @@ const Doutores = () => {
   const { toast } = useToast();
 
   const fetchDoutores = async () => {
+    console.log('Medicos - Clinica contexto:', clinic);
+    console.log('Medicos - Clinica ID:', clinic?.id);
     try {
+      console.log('Medicos - Buscando medicos para clinica:', clinic?.id);
       const { data, error } = await supabase
         .from('medicos')
         .select('*')
         .eq('clinica_id', clinic?.id)
         .order('nome');
+
+      console.log('Medicos - Data encontrada:', data);
+      console.log('Medicos - Error:', error);
 
       if (error) throw error;
       setDoutores(data || []);

@@ -51,6 +51,8 @@ const Dashboard = () => {
   }, [clinic]);
 
   const fetchMetrics = async () => {
+    console.log('Dashboard - Clinica contexto:', clinic);
+    console.log('Dashboard - Clinica ID:', clinic?.id);
     try {
       let totalAppointments = 0;
       let completedAppointments = 0;
@@ -65,10 +67,14 @@ const Dashboard = () => {
 
       // Buscar agendamentos apenas se a agenda estiver ativa
       if (clinic?.agenda_ativa) {
+        console.log('Dashboard - Buscando agendamentos para clinica:', clinic.id);
         const { data: appointments, error: appointmentsError } = await supabase
           .from('agendamentos')
           .select('*')
           .eq('clinica_id', clinic?.id);
+
+        console.log('Dashboard - Appointments encontrados:', appointments);
+        console.log('Dashboard - Appointments error:', appointmentsError);
 
         if (appointmentsError) throw appointmentsError;
 

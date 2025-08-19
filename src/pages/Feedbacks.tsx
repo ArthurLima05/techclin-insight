@@ -40,12 +40,18 @@ const Feedbacks = () => {
   }, [clinic]);
 
   const fetchFeedbacks = async () => {
+    console.log('Feedbacks - Clinica contexto:', clinic);
+    console.log('Feedbacks - Clinica ID:', clinic?.id);
     try {
+      console.log('Feedbacks - Buscando feedbacks para clinica:', clinic?.id);
       const { data, error } = await supabase
         .from('feedbacks')
         .select('*')
         .eq('clinica_id', clinic?.id)
         .order('criado_em', { ascending: false });
+
+      console.log('Feedbacks - Data encontrada:', data);
+      console.log('Feedbacks - Error:', error);
 
       if (error) throw error;
       setFeedbacks(data || []);
