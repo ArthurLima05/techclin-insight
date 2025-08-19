@@ -76,7 +76,8 @@ const Admin = () => {
 
       if (response.data?.success) {
         setIsAuthenticated(true);
-        loadData();
+        // Create temporary admin session by bypassing RLS with service role
+        await loadDataAsAdmin();
         toast.success('Acesso autorizado');
       } else {
         toast.error('Senha de administrador inválida');
@@ -86,6 +87,32 @@ const Admin = () => {
       toast.error('Erro ao verificar credenciais de administrador');
     } finally {
       setIsAuthenticating(false);
+    }
+  };
+
+  const loadDataAsAdmin = async () => {
+    try {
+      const clinicasResult = await supabase.functions.invoke('admin-operations', {
+        body: { 
+          table: 'clinicas', 
+          operation: 'select',
+          data: { password: adminKey }
+        }
+      });
+
+      const whatsappResult = await supabase.functions.invoke('admin-operations', {
+        body: { 
+          table: 'whatsapp_clinicas', 
+          operation: 'select',
+          data: { password: adminKey }
+        }
+      });
+
+      if (clinicasResult.data?.data) setClinicas(clinicasResult.data.data);
+      if (whatsappResult.data?.data) setWhatsappClinicas(whatsappResult.data.data);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      toast.error('Erro ao carregar dados');
     }
   };
 
@@ -126,23 +153,24 @@ const Admin = () => {
 
   const onSubmitClinica = async (data: any) => {
     try {
-      if (editingItem && 'chave_acesso' in editingItem) {
-        await supabase
-          .from('clinicas')
-          .update(data)
-          .eq('id', editingItem.id);
-        toast.success('Clínica atualizada');
-      } else {
-        await supabase
-          .from('clinicas')
-          .insert(data);
-        toast.success('Clínica criada');
-      }
-      
+      const operation = editingItem ? 'update' : 'insert';
+      const requestData = editingItem 
+        ? { ...data, id: editingItem.id, password: adminKey }
+        : { ...data, password: adminKey };
+
+      await supabase.functions.invoke('admin-operations', {
+        body: { 
+          table: 'clinicas', 
+          operation,
+          data: requestData
+        }
+      });
+
       setDialogOpen(false);
       setEditingItem(null);
       clinicaForm.reset();
-      loadData();
+      loadDataAsAdmin();
+      toast.success(editingItem ? 'Clínica atualizada' : 'Clínica criada');
     } catch (error) {
       toast.error('Erro ao salvar clínica');
     }
@@ -150,23 +178,24 @@ const Admin = () => {
 
   const onSubmitWhatsapp = async (data: any) => {
     try {
-      if (editingItem && 'numero_whatsapp' in editingItem) {
-        await supabase
-          .from('whatsapp_clinicas')
-          .update(data)
-          .eq('id', editingItem.id);
-        toast.success('WhatsApp atualizado');
-      } else {
-        await supabase
-          .from('whatsapp_clinicas')
-          .insert(data);
-        toast.success('WhatsApp criado');
-      }
-      
+      const operation = editingItem ? 'update' : 'insert';
+      const requestData = editingItem 
+        ? { ...data, id: editingItem.id, password: adminKey }
+        : { ...data, password: adminKey };
+
+      await supabase.functions.invoke('admin-operations', {
+        body: { 
+          table: 'whatsapp_clinicas', 
+          operation,
+          data: requestData
+        }
+      });
+
       setWhatsappDialogOpen(false);
       setEditingItem(null);
       whatsappForm.reset();
-      loadData();
+      loadDataAsAdmin();
+      toast.success(editingItem ? 'WhatsApp atualizado' : 'WhatsApp criado');
     } catch (error) {
       toast.error('Erro ao salvar WhatsApp');
     }
@@ -174,9 +203,15 @@ const Admin = () => {
 
   const deleteClinica = async (id: string) => {
     try {
-      await supabase.from('clinicas').delete().eq('id', id);
+      await supabase.functions.invoke('admin-operations', {
+        body: { 
+          table: 'clinicas', 
+          operation: 'delete',
+          data: { id, password: adminKey }
+        }
+      });
       toast.success('Clínica excluída');
-      loadData();
+      loadDataAsAdmin();
     } catch (error) {
       toast.error('Erro ao excluir clínica');
     }
@@ -184,9 +219,15 @@ const Admin = () => {
 
   const deleteWhatsapp = async (id: string) => {
     try {
-      await supabase.from('whatsapp_clinicas').delete().eq('id', id);
+      await supabase.functions.invoke('admin-operations', {
+        body: { 
+          table: 'whatsapp_clinicas', 
+          operation: 'delete',
+          data: { id, password: adminKey }
+        }
+      });
       toast.success('WhatsApp excluído');
-      loadData();
+      loadDataAsAdmin();
     } catch (error) {
       toast.error('Erro ao excluir WhatsApp');
     }
