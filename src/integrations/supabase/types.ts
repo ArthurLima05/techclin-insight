@@ -411,6 +411,15 @@ export type Database = {
         Args: { clinica_uuid: string; data_fim: string; data_inicio: string }
         Returns: Json
       }
+      create_clinic_user_profile: {
+        Args: {
+          p_clinica_id: string
+          p_email: string
+          p_full_name: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       ensure_clinic_user_profile: {
         Args: { clinic_uuid: string }
         Returns: string
