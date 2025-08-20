@@ -31,11 +31,12 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Primeiro, buscar a clínica pela chave de acesso
-      const { data, error } = await supabase
-        .rpc('get_clinic_by_access_key', { access_key: accessKey });
+      // Get clinic authentication data using the secure function
+      const { data: authData, error: authError } = await supabase.rpc('authenticate_clinic_user_secure', {
+        p_access_key: accessKey
+      });
 
-      if (error || !data || data.length === 0) {
+      if (authError || !authData || authData.length === 0) {
         toast({
           title: "Erro",
           description: "Chave de acesso inválida",
@@ -44,18 +45,91 @@ const Login = () => {
         return;
       }
 
-      const clinic = data[0];
+      const clinicAuth = authData[0];
 
-      // Definir a clínica no contexto primeiro
-      console.log('Login - Definindo clínica no contexto:', clinic);
-      setClinic({
-        id: clinic.id,
-        nome: clinic.nome,
-        chave_acesso: accessKey,
-        dashboard_ativo: clinic.dashboard_ativo,
-        feedbacks_ativos: clinic.feedbacks_ativos,
-        agenda_ativa: clinic.agenda_ativa
+      // Authenticate or create user with Supabase Auth
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: clinicAuth.user_email,
+        password: clinicAuth.user_password,
       });
+
+      // If user doesn't exist, create them
+      if (signInError && signInError.message.includes('Invalid login credentials')) {
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: clinicAuth.user_email,
+          password: clinicAuth.user_password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              full_name: `Usuário da ${clinicAuth.clinic_name}`,
+              clinic_id: clinicAuth.clinic_id,
+              clinic_name: clinicAuth.clinic_name
+            }
+          }
+        });
+
+        if (signUpError) {
+          console.error('Erro no signup:', signUpError);
+          toast({
+            title: "Erro",
+            description: "Erro ao criar usuário: " + signUpError.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // If signup was successful but needs confirmation, auto-confirm
+        if (signUpData.user && !signUpData.user.email_confirmed_at) {
+          // Force confirmation using the database function
+          await supabase.rpc('force_confirm_user', {
+            p_email: clinicAuth.user_email
+          });
+
+          // Try to sign in again after confirmation
+          const { data: retrySignIn, error: retryError } = await supabase.auth.signInWithPassword({
+            email: clinicAuth.user_email,
+            password: clinicAuth.user_password,
+          });
+
+          if (retryError) {
+            console.error('Erro no retry signin:', retryError);
+            toast({
+              title: "Erro",
+              description: "Erro na autenticação: " + retryError.message,
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+      } else if (signInError) {
+        console.error('Erro no signin:', signInError);
+        toast({
+          title: "Erro",
+          description: "Erro na autenticação: " + signInError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create or update user profile with clinic association
+      await supabase.rpc('ensure_user_profile_on_login', {
+        p_clinic_id: clinicAuth.clinic_id,
+        p_clinic_name: clinicAuth.clinic_name
+      });
+
+      // Set clinic data in context
+      const features = clinicAuth.clinic_features as any;
+      const clinic = {
+        id: clinicAuth.clinic_id,
+        nome: clinicAuth.clinic_name,
+        chave_acesso: accessKey,
+        dashboard_ativo: features.dashboard_ativo,
+        feedbacks_ativos: features.feedbacks_ativos,
+        agenda_ativa: features.agenda_ativa,
+      };
+
+      console.log('Login - Definindo clínica no contexto:', clinic);
+      setClinic(clinic);
 
       toast({
         title: "Sucesso",
@@ -68,7 +142,7 @@ const Login = () => {
         clinic.feedbacks_ativos ? '/feedbacks' : '/medicos'
       );
       
-      // Redirecionamento direto sem autenticação complexa
+      // Navigate based on active clinic features
       if (clinic.dashboard_ativo) {
         navigate('/dashboard');
       } else if (clinic.agenda_ativa) {

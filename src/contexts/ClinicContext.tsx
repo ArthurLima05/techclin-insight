@@ -60,7 +60,7 @@ export const ClinicProvider: React.FC<ClinicProviderProps> = ({ children }) => {
   const value = {
     clinic,
     setClinic,
-    isAuthenticated: !!clinic, // Simplificar autenticação baseada apenas na clínica
+    isAuthenticated: !!clinic && !!user, // Require both authenticated user AND clinic
     user,
   };
 
