@@ -74,8 +74,13 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
     
     try {
       // Buscar o Client ID via Edge Function
-      const { data: configData } = await supabase.functions.invoke('get-google-config');
-      const clientId = configData?.clientId;
+      const { data: configData, error: configError } = await supabase.functions.invoke('get-google-config');
+      
+      if (configError || !configData?.clientId) {
+        throw new Error('Falha ao obter configuração do Google');
+      }
+      
+      const clientId = configData.clientId;
       const redirectUri = `https://scacnshkxfrahxarjrwb.supabase.co/functions/v1/google-oauth`;
       const scope = "https://www.googleapis.com/auth/calendar";
       
@@ -88,29 +93,60 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
         `access_type=offline&` +
         `prompt=consent`;
 
-      const authWindow = window.open(authUrl, '_blank', 'width=500,height=600');
+      // Abrir janela popup para autenticação
+      const authWindow = window.open(
+        authUrl, 
+        'google-auth', 
+        'width=600,height=700,scrollbars=yes,resizable=yes,status=yes'
+      );
+      
+      if (!authWindow) {
+        throw new Error('Não foi possível abrir a janela de autenticação. Verifique se o bloqueador de pop-ups está desabilitado.');
+      }
       
       // Monitorar quando a janela de autenticação é fechada
       const checkAuthWindow = setInterval(() => {
-        if (authWindow?.closed) {
+        if (authWindow.closed) {
           clearInterval(checkAuthWindow);
-          // Aguardar um pouco e verificar a conexão
+          setIsConnecting(false);
+          
+          toast({
+            title: "Processando...",
+            description: "Verificando conexão com Google Calendar",
+            duration: 2000,
+          });
+          
+          // Aguardar e verificar a conexão
           setTimeout(() => {
             checkConnection();
           }, 2000);
         }
       }, 1000);
       
-    } catch (error) {
+      // Timeout de segurança (5 minutos)
+      setTimeout(() => {
+        if (!authWindow.closed) {
+          clearInterval(checkAuthWindow);
+          authWindow.close();
+          setIsConnecting(false);
+          toast({
+            title: "Timeout",
+            description: "Autenticação cancelada por timeout",
+            variant: "destructive",
+            duration: 3000,
+          });
+        }
+      }, 300000);
+      
+    } catch (error: any) {
       console.error('Erro ao iniciar autenticação:', error);
+      setIsConnecting(false);
       toast({
         title: "Erro",
-        description: "Falha ao conectar com Google Calendar",
+        description: error.message || "Falha ao conectar com Google Calendar",
         variant: "destructive",
-        duration: 3000,
+        duration: 5000,
       });
-    } finally {
-      setIsConnecting(false);
     }
   };
 
@@ -184,29 +220,57 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
           {!isConnected ? (
             <Button
               onClick={handleGoogleAuth}
-              disabled={isConnecting}
+              disabled={isConnecting || !clinic}
               className="flex items-center gap-2"
+              variant={isConnecting ? "secondary" : "default"}
             >
               {isConnecting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Conectando...
+                </>
               ) : (
-                <Calendar className="h-4 w-4" />
+                <>
+                  <Calendar className="h-4 w-4" />
+                  Conectar com Google
+                </>
               )}
-              Conectar com Google
             </Button>
           ) : (
-            <Button
-              onClick={handleSync}
-              disabled={isSyncing}
-              className="flex items-center gap-2"
-            >
-              {isSyncing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Calendar className="h-4 w-4" />
-              )}
-              Sincronizar Agendamentos
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleSync}
+                disabled={isSyncing || !clinic}
+                className="flex items-center gap-2"
+                variant={isSyncing ? "secondary" : "default"}
+              >
+                {isSyncing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Sincronizando...
+                  </>
+                ) : (
+                  <>
+                    <Calendar className="h-4 w-4" />
+                    Sincronizar Agendamentos
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsConnected(false);
+                  toast({
+                    title: "Desconectado",
+                    description: "Conecte novamente para sincronizar",
+                    duration: 3000,
+                  });
+                }}
+                variant="outline"
+                size="sm"
+              >
+                Desconectar
+              </Button>
+            </div>
           )}
         </div>
 
