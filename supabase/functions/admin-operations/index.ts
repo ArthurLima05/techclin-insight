@@ -55,11 +55,19 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
-    console.error('Error:', error)
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-    )
+ } catch (error: unknown) {
+  let errorMessage = 'Um erro desconhecido ocorreu';
+
+  if (error instanceof Error) {
+    errorMessage = error.message;
+  } else if (typeof error === 'string') {
+    errorMessage = error;
   }
+
+  console.error('Error:', error);
+  return new Response(
+    JSON.stringify({ error: errorMessage }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+  );
+}
 })

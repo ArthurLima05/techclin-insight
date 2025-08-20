@@ -162,16 +162,24 @@ serve(async (req) => {
       }
     );
 
-  } catch (error) {
-    console.error('Erro na sincronização:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Erro interno do servidor' 
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
-      }
-    );
+} catch (error: unknown) {
+  console.error('Erro na sincronização:', error);
+  let errorMessage = 'Erro interno do servidor';
+  
+  if (error instanceof Error) {
+    errorMessage = error.message;
+  } else if (typeof error === 'string') {
+    errorMessage = error;
   }
+
+  return new Response(
+    JSON.stringify({ 
+      error: errorMessage 
+    }),
+    { 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500
+    }
+  );
+}
 });
