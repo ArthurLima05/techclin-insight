@@ -34,7 +34,7 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
         .from('google_oauth_tokens')
         .select('id, expires_at, clinica_id')
         .eq('clinica_id', clinic.id)
-        .single();
+        .maybeSingle();
       
       console.log('Resultado da query:', { data, error, clinicaId: clinic.id });
       
@@ -55,11 +55,7 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
       setIsConnected(tokenValid);
       
       if (tokenValid) {
-        toast({
-          title: "Conectado!",
-          description: "Google Calendar conectado com sucesso",
-          duration: 3000,
-        });
+        console.log('Google Calendar conectado com sucesso!');
       }
     } catch (error) {
       console.error('Erro na verificação de conexão:', error);
