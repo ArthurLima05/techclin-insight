@@ -33,7 +33,8 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
       const { data, error } = await supabase
         .from('google_oauth_tokens')
         .select('id, expires_at, clinica_id')
-        .eq('clinica_id', clinic.id);
+        .eq('clinica_id', clinic.id)
+        .single();
       
       console.log('Resultado da query:', { data, error, clinicaId: clinic.id });
       
@@ -43,16 +44,23 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
         return;
       }
       
-      if (!data || data.length === 0) {
+      if (!data) {
         console.log('Nenhum token encontrado para esta clínica');
         setIsConnected(false);
         return;
       }
       
-      const token = data[0];
-      const tokenValid = new Date(token.expires_at) > new Date();
-      console.log('Token encontrado:', token, 'Válido:', tokenValid);
+      const tokenValid = new Date(data.expires_at) > new Date();
+      console.log('Token encontrado:', data, 'Válido:', tokenValid);
       setIsConnected(tokenValid);
+      
+      if (tokenValid) {
+        toast({
+          title: "Conectado!",
+          description: "Google Calendar conectado com sucesso",
+          duration: 3000,
+        });
+      }
     } catch (error) {
       console.error('Erro na verificação de conexão:', error);
       setIsConnected(false);
@@ -108,7 +116,6 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
       const checkAuthWindow = setInterval(() => {
         if (authWindow.closed) {
           clearInterval(checkAuthWindow);
-          setIsConnecting(false);
           
           toast({
             title: "Processando...",
@@ -117,9 +124,10 @@ export const GoogleCalendarIntegration = ({ selectedCalendarId = 'primary' }: Go
           });
           
           // Aguardar e verificar a conexão
-          setTimeout(() => {
-            checkConnection();
-          }, 2000);
+          setTimeout(async () => {
+            setIsConnecting(false);
+            await checkConnection();
+          }, 3000);
         }
       }, 1000);
       
