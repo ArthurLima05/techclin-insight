@@ -55,16 +55,16 @@ export function AppSidebar() {
       enabled: clinic.agenda_ativa,
     },
     {
-      title: "Doutores",
-      url: "/medicos",
-      icon: UserCog,
-      enabled: true, // Sempre disponível
-    },
-    {
       title: "Financeiro",
       url: "/financeiro",
       icon: DollarSign,
       enabled: clinic.financeiro_ativo,
+    },
+    {
+      title: "Doutores",
+      url: "/medicos",
+      icon: UserCog,
+      enabled: true, // Sempre disponível
     },
   ].filter(item => item.enabled);
 
