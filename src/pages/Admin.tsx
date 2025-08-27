@@ -19,6 +19,7 @@ interface Clinica {
   dashboard_ativo: boolean;
   feedbacks_ativos: boolean;
   agenda_ativa: boolean;
+  financeiro_ativo: boolean;
 }
 
 interface WhatsappClinica {
@@ -45,7 +46,8 @@ const Admin = () => {
       chave_acesso: '',
       dashboard_ativo: true,
       feedbacks_ativos: false,
-      agenda_ativa: false
+      agenda_ativa: false,
+      financeiro_ativo: false
     }
   });
 
@@ -392,7 +394,24 @@ const Admin = () => {
                           <FormLabel>Agenda Ativa</FormLabel>
                         </FormItem>
                       )}
+                     />
+                    
+                    <FormField
+                      control={clinicaForm.control}
+                      name="financeiro_ativo"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center space-x-2">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel>Financeiro Ativo</FormLabel>
+                        </FormItem>
+                      )}
                     />
+                    
                     <DialogFooter>
                       <Button type="submit">
                         {editingItem ? 'Atualizar' : 'Criar'}
@@ -413,6 +432,7 @@ const Admin = () => {
                 <TableHead>Dashboard</TableHead>
                 <TableHead>Feedbacks</TableHead>
                 <TableHead>Agenda</TableHead>
+                <TableHead>Financeiro</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -424,6 +444,7 @@ const Admin = () => {
                   <TableCell>{clinica.dashboard_ativo ? 'Ativo' : 'Inativo'}</TableCell>
                   <TableCell>{clinica.feedbacks_ativos ? 'Ativo' : 'Inativo'}</TableCell>
                   <TableCell>{clinica.agenda_ativa ? 'Ativo' : 'Inativo'}</TableCell>
+                  <TableCell>{clinica.financeiro_ativo ? 'Ativo' : 'Inativo'}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button

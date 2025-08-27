@@ -113,6 +113,7 @@ export type Database = {
           created_at: string
           dashboard_ativo: boolean
           feedbacks_ativos: boolean
+          financeiro_ativo: boolean
           id: string
           nome: string
           updated_at: string
@@ -123,6 +124,7 @@ export type Database = {
           created_at?: string
           dashboard_ativo?: boolean
           feedbacks_ativos?: boolean
+          financeiro_ativo?: boolean
           id?: string
           nome: string
           updated_at?: string
@@ -133,6 +135,7 @@ export type Database = {
           created_at?: string
           dashboard_ativo?: boolean
           feedbacks_ativos?: boolean
+          financeiro_ativo?: boolean
           id?: string
           nome?: string
           updated_at?: string
@@ -185,6 +188,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      financeiro: {
+        Row: {
+          clinica_id: string
+          created_at: string
+          data: string
+          descricao: string
+          id: string
+          tipo: string
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          clinica_id: string
+          created_at?: string
+          data?: string
+          descricao: string
+          id?: string
+          tipo: string
+          updated_at?: string
+          valor: number
+        }
+        Update: {
+          clinica_id?: string
+          created_at?: string
+          data?: string
+          descricao?: string
+          id?: string
+          tipo?: string
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: []
       }
       google_oauth_tokens: {
         Row: {

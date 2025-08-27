@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { BarChart3, MessageSquare, Calendar, LogOut, UserCog } from 'lucide-react';
+import { BarChart3, MessageSquare, Calendar, LogOut, UserCog, DollarSign } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -59,6 +59,12 @@ export function AppSidebar() {
       url: "/medicos",
       icon: UserCog,
       enabled: true, // Sempre disponível
+    },
+    {
+      title: "Financeiro",
+      url: "/financeiro",
+      icon: DollarSign,
+      enabled: clinic.financeiro_ativo,
     },
   ].filter(item => item.enabled);
 

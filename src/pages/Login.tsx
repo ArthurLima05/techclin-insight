@@ -126,6 +126,7 @@ const Login = () => {
         dashboard_ativo: features.dashboard_ativo,
         feedbacks_ativos: features.feedbacks_ativos,
         agenda_ativa: features.agenda_ativa,
+        financeiro_ativo: features.financeiro_ativo || false,
       };
 
       console.log('Login - Definindo clínica no contexto:', clinic);

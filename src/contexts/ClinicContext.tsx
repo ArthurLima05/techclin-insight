@@ -8,6 +8,7 @@ interface Clinic {
   dashboard_ativo: boolean;
   feedbacks_ativos: boolean;
   agenda_ativa: boolean;
+  financeiro_ativo: boolean;
 }
 
 interface ClinicContextType {
