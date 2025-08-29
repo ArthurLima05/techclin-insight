@@ -161,22 +161,22 @@ const Financeiro: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Financeiro</h1>
-        <div className="flex gap-2">
-          <Button onClick={loadFinanceiroData} variant="outline" size="sm">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">Financeiro</h1>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button onClick={loadFinanceiroData} variant="outline" size="sm" className="w-full sm:w-auto">
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Registro
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="mx-4 max-w-md sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle>Novo Registro Financeiro</DialogTitle>
               </DialogHeader>
@@ -228,7 +228,7 @@ const Financeiro: React.FC = () => {
       </div>
 
       {/* Cards principais */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Entradas</CardTitle>
@@ -267,13 +267,13 @@ const Financeiro: React.FC = () => {
       </div>
 
       {/* Gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Entrada vs Saída</CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="p-4 sm:p-6">
+            <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
                   data={pieData}
@@ -303,8 +303,8 @@ const Financeiro: React.FC = () => {
           <CardHeader>
             <CardTitle>Comparativo: Entradas vs Saídas por Tempo</CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="p-4 sm:p-6">
+            <ResponsiveContainer width="100%" height={250}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
@@ -320,49 +320,56 @@ const Financeiro: React.FC = () => {
 
       {/* Tabela de registros */}
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4 sm:p-6">
           <CardTitle>Últimos Registros</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 sm:p-6 sm:pt-0">
           {loading ? (
-            <div className="text-center py-4">Carregando...</div>
+            <div className="text-center py-8">Carregando...</div>
           ) : records.length === 0 ? (
-            <div className="text-center py-4 text-muted-foreground">
+            <div className="text-center py-8 text-muted-foreground">
               Nenhum registro financeiro encontrado
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Data</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {records.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell>{record.descricao}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        record.tipo === 'entrada' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {record.tipo === 'entrada' ? 'Entrada' : 'Saída'}
-                      </span>
-                    </TableCell>
-                    <TableCell className={record.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}>
-                      {formatCurrency(record.valor)}
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(record.data), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[150px]">Descrição</TableHead>
+                    <TableHead className="min-w-[80px]">Tipo</TableHead>
+                    <TableHead className="min-w-[100px]">Valor</TableHead>
+                    <TableHead className="min-w-[120px]">Data</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+              <TableBody>
+                  {records.map((record) => (
+                    <TableRow key={record.id}>
+                      <TableCell className="font-medium">{record.descricao}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${
+                          record.tipo === 'entrada' 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                        }`}>
+                          {record.tipo === 'entrada' ? 'Entrada' : 'Saída'}
+                        </span>
+                      </TableCell>
+                      <TableCell className={`font-medium ${record.tipo === 'entrada' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {formatCurrency(record.valor)}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        <span className="hidden sm:inline">
+                          {format(new Date(record.data), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                        </span>
+                        <span className="sm:hidden">
+                          {format(new Date(record.data), 'dd/MM/yy', { locale: ptBR })}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
