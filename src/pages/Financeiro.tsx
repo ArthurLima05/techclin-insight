@@ -283,13 +283,17 @@ const Financeiro: React.FC = () => {
                   outerRadius={120}
                   paddingAngle={5}
                   dataKey="value"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
                 >
                   {pieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                <Tooltip 
+                  formatter={(value, name, props) => [
+                    formatCurrency(Number(value)), 
+                    `${name} (${((Number(value) / (totalEntradas + totalSaidas)) * 100).toFixed(1)}%)`
+                  ]}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
