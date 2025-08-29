@@ -147,11 +147,11 @@ const Financeiro: React.FC = () => {
 
   // Dados para gráfico de pizza
   const pieData = [
-    { name: 'Entradas', value: totalEntradas, color: 'hsl(var(--chart-1))' },
-    { name: 'Saídas', value: totalSaidas, color: 'hsl(var(--chart-2))' }
+    { name: 'Entradas', value: totalEntradas, color: 'hsl(var(--primary))' },
+    { name: 'Saídas', value: totalSaidas, color: 'hsl(var(--accent))' }
   ];
 
-  const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))'];
+  const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))'];
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -310,8 +310,8 @@ const Financeiro: React.FC = () => {
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                <Bar dataKey="entradas" fill="hsl(var(--chart-1))" name="Entradas" />
-                <Bar dataKey="saidas" fill="hsl(var(--chart-2))" name="Saídas" />
+                <Bar dataKey="entradas" fill="hsl(var(--primary))" name="Entradas" />
+                <Bar dataKey="saidas" fill="hsl(var(--accent))" name="Saídas" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
