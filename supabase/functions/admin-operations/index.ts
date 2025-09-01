@@ -33,7 +33,11 @@ serve(async (req) => {
     let result
     switch (operation) {
       case 'select':
-        result = await supabaseServiceRole.from(table).select('*').order('nome')
+        if (table === 'whatsapp_clinicas') {
+          result = await supabaseServiceRole.from(table).select('*').order('numero_whatsapp')
+        } else {
+          result = await supabaseServiceRole.from(table).select('*').order('nome')
+        }
         break
       case 'insert':
         const { password: _, ...insertData } = data
