@@ -34,7 +34,10 @@ serve(async (req) => {
     switch (operation) {
       case 'select':
         if (table === 'whatsapp_clinicas') {
-          result = await supabaseServiceRole.from(table).select('*').order('numero_whatsapp')
+          result = await supabaseServiceRole
+            .from(table)
+            .select('*, clinicas(nome)')
+            .order('numero_whatsapp')
         } else {
           result = await supabaseServiceRole.from(table).select('*').order('nome')
         }
