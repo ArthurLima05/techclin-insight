@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useClinic } from '@/contexts/ClinicContext';
-import { DollarSign, TrendingUp, TrendingDown, Plus, RefreshCw } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -107,6 +107,33 @@ const Financeiro: React.FC = () => {
       toast({
         title: "Erro",
         description: "Erro ao salvar registro financeiro",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('financeiro')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Registro excluído com sucesso"
+      });
+
+      loadFinanceiroData();
+    } catch (error) {
+      console.error('Erro ao excluir registro:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir registro financeiro",
         variant: "destructive"
       });
     }
@@ -339,6 +366,7 @@ const Financeiro: React.FC = () => {
                     <TableHead className="min-w-[80px]">Tipo</TableHead>
                     <TableHead className="min-w-[100px]">Valor</TableHead>
                     <TableHead className="min-w-[120px]">Data</TableHead>
+                    <TableHead className="w-[80px]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
               <TableBody>
@@ -364,6 +392,16 @@ const Financeiro: React.FC = () => {
                         <span className="sm:hidden">
                           {format(new Date(record.data), 'dd/MM/yy', { locale: ptBR })}
                         </span>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(record.id)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
